@@ -1,0 +1,31 @@
+CREATE TABLE IF NOT EXISTS transfers (
+    trx_id String,
+    action_ordinal String,
+    contract String,
+    action String,
+    symcode String,
+    from String,
+    to String,
+    memo String,
+    quantity String,
+    amount String,
+    precision String,
+    value String,
+)
+ENGINE = MergeTree()
+ORDER BY (trx_id);
+
+CREATE TABLE IF NOT EXISTS accounts (
+    trx_id String,
+    action_index String,
+    contract String,
+    symcode String,
+    amount String,
+    precision String,
+    value String,
+    account String,
+    balance String,
+    balance_delta String,
+)
+ENGINE = MergeTree()
+ORDER BY (trx_id)
