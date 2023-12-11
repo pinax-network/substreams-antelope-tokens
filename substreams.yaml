@@ -1,7 +1,7 @@
 specVersion: v0.1.0
 package:
   name: antelope_tokens
-  version: v0.1.0
+  version: v0.2.0
   url: https://github.com/pinax-network/substreams-antelope-tokens
   doc: Antelope `eosio.token` based action traces & database operations.
 
@@ -50,6 +50,7 @@ modules:
     kind: map
     inputs:
       - map: map_accounts
+      - map: map_stat
       - map: map_transfers
     output:
       type: proto:sf.substreams.sink.entity.v1.EntityChanges

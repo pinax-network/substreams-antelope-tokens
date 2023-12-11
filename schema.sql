@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS transfers (
     value String,
 )
 ENGINE = MergeTree()
-ORDER BY (trx_id);
+ORDER BY (timestamp, block_number, chain); # Created by Clickhouse Sink
 
 CREATE TABLE IF NOT EXISTS accounts (
     trx_id String,
@@ -28,4 +28,20 @@ CREATE TABLE IF NOT EXISTS accounts (
     balance_delta String,
 )
 ENGINE = MergeTree()
-ORDER BY (trx_id)
+ORDER BY (timestamp, block_number, chain); # Created by Clickhouse Sink
+
+CREATE TABLE IF NOT EXISTS stats (
+    trx_id String,
+    action_index String,
+    contract String,
+    symcode String,
+    issuer String,
+    max_supply String,
+    supply String,
+    supply_delta String,
+    precision String,
+    amount String,
+    value String,
+)
+ENGINE = MergeTree()
+ORDER BY (timestamp, block_number, chain) # Created by Clickhouse Sink

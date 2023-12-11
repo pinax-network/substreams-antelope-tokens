@@ -45,6 +45,10 @@ accounts:
 stat:
 	substreams gui -e eos.substreams.pinax.network:443 map_stat -s -10000
 
+.PHONY: graph_out
+graph_out:
+	substreams gui -e eos.substreams.pinax.network:443 graph_out -s -1
+
 .PHONY: wax
 wax:
 	substreams run -e wax.substreams.pinax.network:443 map_transfers -s 258145472 -t +2 -p map_transfers="symcode=VOID,BLUX"

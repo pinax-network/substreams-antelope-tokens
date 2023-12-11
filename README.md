@@ -4,46 +4,6 @@
 
 ### [Latest Releases](https://github.com/pinax-network/substreams-antelope-tokens/releases)
 
-
-### Param
-Param allow to filter messages and can be supplied to modules in the form of URL query.
-
-> i.e. `to=swap.defi&contract=eosio.token&symcode=EOS` - filters EOS transfers to `swap.defi` account.
-
-- `map_transfers` - filter transfers
-  - `to` - receiver
-  - `from` - sender
-  - `symcode` - symbol code
-  - `contract` - token contract
-  - `to_or_from` - either receiver or sender
-  - `quantity_lt` - quantity amount **less than**
-  - `quantity_lte` - quantity amount **less than or equal to**
-  - `quantity_gt` - quantity amount **greater than**
-  - `quantity_gte` - quantity amount **greater than or equal to**
-- `map_accounts` - filter account balance changes
-  - `account` - account
-  - `symcode` - symbol code
-  - `contract` - token contract
-  - `balance_lt` - balance amount **less than**
-  - `balance_lte` - balance amount **less than or equal to**
-  - `balance_gt` - balance amount **greater than**
-  - `balance_gte` - balance amount **greater than or equal to**
-  - `balance_delta_lt` - balance delta amount **less than**
-  - `balance_delta_lte` - balance delta amount **less than or equal to**
-  - `balance_delta_gt` - balance delta amount **greater than**
-  - `balance_delta_gte` - balance delta amount **greater than or equal to**
-- `map_stat` - filter token stats
-  - `symcode` - symbol code
-  - `contract` - token contract
-  - `supply_lt` - supply amount **less than**
-  - `supply_lte` - supply amount **less than or equal to**
-  - `supply_gt` - supply amount **greater than**
-  - `supply_gte` - supply amount **greater than or equal to**
-  - `supply_delta_lt` - supply delta amount **less than**
-  - `supply_delta_lte` - supply delta amount **less than or equal to**
-  - `supply_delta_gt` - supply delta amount **greater than**
-  - `supply_delta_gte` - supply delta amount **greater than or equal to**
-
 ### Quickstart
 
 ```bash

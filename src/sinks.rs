@@ -7,7 +7,7 @@ use substreams_database_change::pb::database::{table_change, DatabaseChanges};
 use crate::eosio_token::{Accounts, Stats, TransferEvents};
 
 #[substreams::handlers::map]
-pub fn graph_out(map_accounts: Accounts, map_transfers: TransferEvents) -> Result<EntityChanges, Error> {
+pub fn graph_out(map_accounts: Accounts, map_stats: Stats, map_transfers: TransferEvents) -> Result<EntityChanges, Error> {
     let mut tables = substreams_entity_change::tables::Tables::new();
     
     for account in map_accounts.items {
@@ -15,6 +15,7 @@ pub fn graph_out(map_accounts: Accounts, map_transfers: TransferEvents) -> Resul
             .create_row("accounts", account.trx_id.as_str().to_string())
             
             // transaction
+            .set("trx_id", account.trx_id.to_string())
             .set("action_index", account.action_index.to_string())
             
             // contract & scope
@@ -29,6 +30,29 @@ pub fn graph_out(map_accounts: Accounts, map_transfers: TransferEvents) -> Resul
             .set("precision", account.precision.to_string())
             .set("amount", account.amount.to_string())
             .set("value", account.value.to_string());
+    }
+
+    for stat in map_stats.items {
+        tables.create_row("stats", stat.trx_id.as_str().to_string())
+
+        // transaction
+        .set("trx_id", stat.trx_id.to_string())
+        .set("action_index", stat.action_index.to_string())
+
+        // contract & scope
+        .set("contract", stat.contract.to_string())
+        .set("symcode", stat.symcode.to_string())
+
+        // data payload
+        .set("issuer", stat.issuer.to_string())
+        .set("max_supply", stat.max_supply.to_string())
+        .set("supply", stat.supply.to_string())
+        .set("supply_delta", stat.supply_delta.to_string())
+
+        // extras
+        .set("precision", stat.precision.to_string())
+        .set("amount", stat.amount.to_string())
+        .set("value", stat.value.to_string());
     }
 
     for transfer in map_transfers.items {
