@@ -33,10 +33,6 @@ run:
 gui:
 	substreams gui -e eos.substreams.pinax.network:443 map_transfers -s -1
 
-.PHONY: params
-params:
-	substreams gui -e eos.substreams.pinax.network:443 map_transfers -s -1 -p map_transfers="to=swap.defi&symcode=EOS,USDT"
-
 .PHONY: accounts
 accounts:
 	substreams gui -e eos.substreams.pinax.network:443 map_accounts -s -1
@@ -48,7 +44,3 @@ stat:
 .PHONY: graph_out
 graph_out:
 	substreams gui -e eos.substreams.pinax.network:443 graph_out -s -1
-
-.PHONY: wax
-wax:
-	substreams run -e wax.substreams.pinax.network:443 map_transfers -s 258145472 -t +2 -p map_transfers="symcode=VOID,BLUX"
