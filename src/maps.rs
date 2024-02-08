@@ -1,7 +1,7 @@
 use antelope::Symbol;
 use substreams::errors::Error;
-use substreams::log;
-use substreams_antelope::Block;
+// use substreams::log;
+use substreams_antelope::pb::Block;
 
 use crate::abi;
 use crate::eosio_token::*;
@@ -9,7 +9,7 @@ use crate::utils;
 use antelope::{Asset, Name, SymbolCode};
 
 #[substreams::handlers::map]
-fn map_accounts(_params: String, block: Block) -> Result<Accounts, Error> {
+fn map_accounts(block: Block) -> Result<Accounts, Error> {
     let mut items = vec![];
 
     for trx in block.all_transaction_traces() {
@@ -73,7 +73,7 @@ fn map_accounts(_params: String, block: Block) -> Result<Accounts, Error> {
 }
 
 #[substreams::handlers::map]
-fn map_stat(_params: String, block: Block) -> Result<Stats, Error> {
+fn map_stat(block: Block) -> Result<Stats, Error> {
     let mut items = vec![];
 
     for trx in block.all_transaction_traces() {
@@ -111,7 +111,8 @@ fn map_stat(_params: String, block: Block) -> Result<Stats, Error> {
                 false => supply.amount,
             };
 
-            // TO-DO fix in case of new_data is None
+            // Skip if no new data
+            if new_data.is_none() { continue; }
             let data = new_data.unwrap();
 
             items.push(Stat {
@@ -140,7 +141,7 @@ fn map_stat(_params: String, block: Block) -> Result<Stats, Error> {
 }
 
 #[substreams::handlers::map]
-fn map_transfers(_params: String, block: Block) -> Result<TransferEvents, Error> {
+fn map_transfers(block: Block) -> Result<TransferEvents, Error> {
     let mut response = vec![];
 
     for trx in block.all_transaction_traces() {
@@ -158,12 +159,12 @@ fn map_transfers(_params: String, block: Block) -> Result<TransferEvents, Error>
                     let amount = quantity.amount;
                     let contract = action_trace.account.clone();
 
-                    log::debug!("symcode: {:?}", symcode);
+                    // log::debug!("symcode: {:?}", symcode);
 
                     response.push(TransferEvent {
                         // trace information
                         trx_id: trx.id.clone(),
-                        action_ordinal: trace.action_ordinal,
+                        action_index: trace.action_ordinal,
 
                         // contract & scope
                         contract,

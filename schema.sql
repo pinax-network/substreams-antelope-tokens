@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS transfers (
     trx_id String,
-    action_ordinal UInt32,
+    action_index UInt32,
     contract FixedString(12),
     action String,
     symcode String,

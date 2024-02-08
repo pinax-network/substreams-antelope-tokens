@@ -56,9 +56,9 @@ message TransferEvents {
 }
 
 message TransferEvent {
-    // transaction
+    // trace information
     string trx_id = 1;
-    uint32 action_ordinal = 2;
+    uint32 action_index = 2;
 
     // contract & scope
     string contract = 3;
