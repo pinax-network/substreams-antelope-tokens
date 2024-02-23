@@ -19,6 +19,7 @@ pub fn graph_out(map_accounts: Accounts, map_stats: Stats, map_transfers: Transf
 
             // contract & scope
             .set("contract", account.contract.to_string())
+            .set("symcode", account.symcode.to_string())
 
             // data payload
             .set("account", account.account.to_string())
