@@ -12,7 +12,7 @@ use antelope::{Asset, Name, SymbolCode};
 fn map_accounts(block: Block) -> Result<Accounts, Error> {
     let mut items = vec![];
 
-    for trx in block.all_transaction_traces() {
+    for trx in block.executed_transaction_traces() {
         for db_op in &trx.db_ops {
             if db_op.table_name != "accounts" { continue; }
 
@@ -76,7 +76,7 @@ fn map_accounts(block: Block) -> Result<Accounts, Error> {
 fn map_stat(block: Block) -> Result<Stats, Error> {
     let mut items = vec![];
 
-    for trx in block.all_transaction_traces() {
+    for trx in block.executed_transaction_traces() {
         for db_op in &trx.db_ops {
             if db_op.table_name != "stat" { continue; }
 
@@ -144,7 +144,7 @@ fn map_stat(block: Block) -> Result<Stats, Error> {
 fn map_transfers(block: Block) -> Result<TransferEvents, Error> {
     let mut response = vec![];
 
-    for trx in block.all_transaction_traces() {
+    for trx in block.executed_transaction_traces() {
         // action traces
         for trace in &trx.action_traces {
             let action_trace = trace.action.as_ref().unwrap();
