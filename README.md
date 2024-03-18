@@ -31,7 +31,7 @@ graph TD;
 
 ```yaml
 Package name: antelope_tokens
-Version: v0.3.1
+Version: v0.3.2
 Doc: Antelope `eosio.token` based action traces & database operations.
 Modules:
 ----
