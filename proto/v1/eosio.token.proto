@@ -2,77 +2,91 @@ syntax = "proto3";
 
 package antelope.eosio.token.v1;
 
+import "google/protobuf/timestamp.proto";
+
 message Accounts {
-    repeated Account items = 1;
+  repeated Account items = 1;
 }
 
 message Account {
-    // trace information
-    string trx_id = 1;
-    uint32 action_index = 2;
+  // trace information
+  string trx_id = 1;
+  uint32 action_index = 2;
 
-    // contract & scope
-    string contract = 3;
-    string symcode = 4;
+  // contract & scope
+  string contract = 3;
+  string symcode = 4;
 
-    // data payload
-    string account = 5;
-    string balance = 6;
-    int64 balance_delta = 7;
+  // data payload
+  string account = 5;
+  string balance = 6;
+  int64 balance_delta = 7;
 
-    // extras
-    uint32 precision = 10;
-    int64 amount = 11;
-    double value = 12;
+  // extras
+  uint32 precision = 10;
+  int64 amount = 11;
+  double value = 12;
+
+  // block information
+  uint64 block_num = 13;
+  google.protobuf.Timestamp timestamp = 14;
 }
 
 message Stats {
-    repeated Stat items = 1;
+  repeated Stat items = 1;
 }
 
 message Stat {
-    // trace information
-    string trx_id = 1;
-    uint32 action_index = 2;
+  // trace information
+  string trx_id = 1;
+  uint32 action_index = 2;
 
-    // contract & scope
-    string contract = 3;
-    string symcode = 4;
+  // contract & scope
+  string contract = 3;
+  string symcode = 4;
 
-    // data payload
-    string issuer = 5;
-    string max_supply = 6;
-    string supply = 7;
-    int64 supply_delta = 8;
+  // data payload
+  string issuer = 5;
+  string max_supply = 6;
+  string supply = 7;
+  int64 supply_delta = 8;
 
-    // extras
-    uint32 precision = 10;
-    int64 amount = 11;
-    double value = 12;
+  // extras
+  uint32 precision = 10;
+  int64 amount = 11;
+  double value = 12;
+
+  // block information
+  uint64 block_num = 13;
+  google.protobuf.Timestamp timestamp = 14;
 }
 
 message TransferEvents {
-    repeated TransferEvent items = 1;
+  repeated TransferEvent items = 1;
 }
 
 message TransferEvent {
-    // trace information
-    string trx_id = 1;
-    uint32 action_index = 2;
+  // trace information
+  string trx_id = 1;
+  uint32 action_index = 2;
 
-    // contract & scope
-    string contract = 3;
-    string action = 4;
-    string symcode = 5;
+  // contract & scope
+  string contract = 3;
+  string action = 4;
+  string symcode = 5;
 
-    // data payload
-    string from = 6;
-    string to = 7;
-    string quantity = 8;
-    string memo = 9;
+  // data payload
+  string from = 6;
+  string to = 7;
+  string quantity = 8;
+  string memo = 9;
 
-    // extras
-    uint32 precision = 10;
-    int64 amount = 11;
-    double value = 12;
+  // extras
+  uint32 precision = 10;
+  int64 amount = 11;
+  double value = 12;
+
+  // block information
+  uint64 block_num = 13;
+  google.protobuf.Timestamp timestamp = 14;
 }

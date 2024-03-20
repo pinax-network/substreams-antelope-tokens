@@ -32,6 +32,11 @@ pub struct Account {
     pub amount: i64,
     #[prost(double, tag="12")]
     pub value: f64,
+    /// block information
+    #[prost(uint64, tag="13")]
+    pub block_num: u64,
+    #[prost(message, optional, tag="14")]
+    pub timestamp: ::core::option::Option<::prost_types::Timestamp>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -68,6 +73,11 @@ pub struct Stat {
     pub amount: i64,
     #[prost(double, tag="12")]
     pub value: f64,
+    /// block information
+    #[prost(uint64, tag="13")]
+    pub block_num: u64,
+    #[prost(message, optional, tag="14")]
+    pub timestamp: ::core::option::Option<::prost_types::Timestamp>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -78,7 +88,7 @@ pub struct TransferEvents {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct TransferEvent {
-    /// transaction
+    /// trace information
     #[prost(string, tag="1")]
     pub trx_id: ::prost::alloc::string::String,
     #[prost(uint32, tag="2")]
@@ -106,5 +116,10 @@ pub struct TransferEvent {
     pub amount: i64,
     #[prost(double, tag="12")]
     pub value: f64,
+    /// block information
+    #[prost(uint64, tag="13")]
+    pub block_num: u64,
+    #[prost(message, optional, tag="14")]
+    pub timestamp: ::core::option::Option<::prost_types::Timestamp>,
 }
 // @@protoc_insertion_point(module)
