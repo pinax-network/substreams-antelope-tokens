@@ -1,6 +1,5 @@
 use antelope::Symbol;
 use substreams::errors::Error;
-// use substreams::log;
 use substreams_antelope::pb::Block;
 
 use crate::abi;
@@ -65,7 +64,7 @@ fn map_accounts(block: Block) -> Result<Accounts, Error> {
                 // extras
                 precision: precision.into(),
                 amount: balance.amount,
-                value: utils::to_value(balance),
+                value: utils::to_value(&balance),
             });
         }
     }
@@ -133,7 +132,7 @@ fn map_stat(block: Block) -> Result<Stats, Error> {
                 // extras
                 precision: precision.into(),
                 amount: supply.amount,
-                value: utils::to_value(supply),
+                value: utils::to_value(&supply),
             });
         }
     }
@@ -180,7 +179,7 @@ fn map_transfers(block: Block) -> Result<TransferEvents, Error> {
                         // extras
                         precision,
                         amount,
-                        value: utils::to_value(quantity),
+                        value: utils::to_value(&quantity),
                     });
                 }
                 Err(_) => continue,
