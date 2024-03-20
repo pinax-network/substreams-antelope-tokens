@@ -67,7 +67,7 @@ fn map_accounts(block: Block) -> Result<Accounts, Error> {
                 value: utils::to_value(&balance),
 
                 block_num: block.number as u64,
-                timestamp: block.header.clone().unwrap().timestamp,
+                timestamp: block.header.as_ref().unwrap().timestamp.clone(),
             });
         }
     }
@@ -138,7 +138,7 @@ fn map_stat(block: Block) -> Result<Stats, Error> {
                 value: utils::to_value(&supply),
 
                 block_num: block.number as u64,
-                timestamp: block.header.clone().unwrap().timestamp,
+                timestamp: block.header.as_ref().unwrap().timestamp.clone(),
             });
         }
     }
@@ -188,7 +188,7 @@ fn map_transfers(block: Block) -> Result<TransferEvents, Error> {
                         value: utils::to_value(&quantity),
 
                         block_num: block.number as u64,
-                        timestamp: block.header.clone().unwrap().timestamp,
+                        timestamp: block.header.as_ref().unwrap().timestamp.clone(),
                     });
                 }
                 Err(_) => continue,
