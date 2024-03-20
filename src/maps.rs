@@ -65,6 +65,9 @@ fn map_accounts(block: Block) -> Result<Accounts, Error> {
                 precision: precision.into(),
                 amount: balance.amount,
                 value: utils::to_value(&balance),
+
+                block_num: block.number as u64,
+                timestamp: block.header.clone().unwrap().timestamp,
             });
         }
     }
@@ -133,6 +136,9 @@ fn map_stat(block: Block) -> Result<Stats, Error> {
                 precision: precision.into(),
                 amount: supply.amount,
                 value: utils::to_value(&supply),
+
+                block_num: block.number as u64,
+                timestamp: block.header.clone().unwrap().timestamp,
             });
         }
     }
@@ -180,6 +186,9 @@ fn map_transfers(block: Block) -> Result<TransferEvents, Error> {
                         precision,
                         amount,
                         value: utils::to_value(&quantity),
+
+                        block_num: block.number as u64,
+                        timestamp: block.header.clone().unwrap().timestamp,
                     });
                 }
                 Err(_) => continue,
