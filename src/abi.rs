@@ -6,7 +6,6 @@ type Asset = String;
 type Name = String;
 type Symbol = String;
 
-
 macro_rules! impl_try_from_str {
     ($type:ty) => {
         impl TryFrom<&str> for $type {
@@ -18,7 +17,6 @@ macro_rules! impl_try_from_str {
         }
     };
 }
-
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 #[serde(deny_unknown_fields)]
@@ -87,4 +85,3 @@ pub struct Transfer {
     pub memo: String,
 }
 impl_try_from_str!(Transfer);
-

@@ -5,6 +5,6 @@ pub use self::eosio_token::*;
 
 mod abi;
 mod maps;
+mod pb;
 mod sinks;
 mod utils;
-mod pb;

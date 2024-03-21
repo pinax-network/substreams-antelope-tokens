@@ -1,11 +1,11 @@
-use antelope::Symbol;
 use substreams::errors::Error;
+use substreams::log;
 use substreams_antelope::pb::Block;
 
 use crate::abi;
 use crate::eosio_token::*;
 use crate::utils;
-use antelope::{Asset, Name, SymbolCode};
+use antelope::{Symbol, Asset, Name, SymbolCode};
 
 #[substreams::handlers::map]
 fn map_accounts(block: Block) -> Result<Accounts, Error> {
@@ -13,7 +13,9 @@ fn map_accounts(block: Block) -> Result<Accounts, Error> {
 
     for trx in block.executed_transaction_traces() {
         for db_op in &trx.db_ops {
-            if db_op.table_name != "accounts" { continue; }
+            if db_op.table_name != "accounts" {
+                continue;
+            }
 
             let contract = db_op.code.clone();
             let raw_primary_key = Name::from(db_op.primary_key.as_str()).value;
@@ -22,14 +24,28 @@ fn map_accounts(block: Block) -> Result<Accounts, Error> {
 
             let old_data = abi::Account::try_from(db_op.old_data_json.as_str()).ok();
             let new_data = abi::Account::try_from(db_op.new_data_json.as_str()).ok();
-            if old_data.is_none() && new_data.is_none() { continue; } // no data
+            if old_data.is_none() && new_data.is_none() {
+                continue;
+            } // no data
 
             let old_balance = match &old_data {
-                Some(data) => Some(Asset::from(data.balance.as_str())),
+                Some(data) => match data.balance.parse::<Asset>() {
+                    Ok(asset) => Some(asset),
+                    Err(e) => {
+                        log::info!("Error parsing old balance asset: {:?}", e);
+                        continue;
+                    }
+                },
                 None => None,
             };
             let new_balance = match &new_data {
-                Some(data) => Some(Asset::from(data.balance.as_str())),
+                Some(data) => match data.balance.parse::<Asset>() {
+                    Ok(asset) => Some(asset),
+                    Err(e) => {
+                        log::info!("Error parsing new balance asset: {:?}", e);
+                        continue;
+                    }
+                },
                 None => None,
             };
             let precision = match new_balance.is_some() {
@@ -80,7 +96,9 @@ fn map_stat(block: Block) -> Result<Stats, Error> {
 
     for trx in block.executed_transaction_traces() {
         for db_op in &trx.db_ops {
-            if db_op.table_name != "stat" { continue; }
+            if db_op.table_name != "stat" {
+                continue;
+            }
 
             let contract = db_op.code.clone();
             let raw_primary_key = Name::from(db_op.primary_key.as_str()).value;
@@ -88,7 +106,9 @@ fn map_stat(block: Block) -> Result<Stats, Error> {
 
             let old_data = abi::CurrencyStats::try_from(db_op.old_data_json.as_str()).ok();
             let new_data = abi::CurrencyStats::try_from(db_op.new_data_json.as_str()).ok();
-            if old_data.is_none() && new_data.is_none() { continue; } // no data
+            if old_data.is_none() && new_data.is_none() {
+                continue;
+            } // no data
 
             let old_supply = match &old_data {
                 Some(data) => Some(Asset::from(data.supply.as_str())),
@@ -114,7 +134,9 @@ fn map_stat(block: Block) -> Result<Stats, Error> {
             };
 
             // Skip if no new data
-            if new_data.is_none() { continue; }
+            if new_data.is_none() {
+                continue;
+            }
             let data = new_data.unwrap();
 
             items.push(Stat {
@@ -153,8 +175,12 @@ fn map_transfers(block: Block) -> Result<TransferEvents, Error> {
         // action traces
         for trace in &trx.action_traces {
             let action_trace = trace.action.as_ref().unwrap();
-            if action_trace.account != trace.receiver { continue; }
-            if action_trace.name != "transfer" { continue; }
+            if action_trace.account != trace.receiver {
+                continue;
+            }
+            if action_trace.name != "transfer" {
+                continue;
+            }
 
             match abi::Transfer::try_from(action_trace.json_data.as_str()) {
                 Ok(data) => {
