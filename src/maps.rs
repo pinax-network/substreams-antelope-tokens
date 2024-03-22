@@ -162,7 +162,13 @@ fn map_transfers(block: Block) -> Result<TransferEvents, Error> {
 
             match abi::Transfer::try_from(action_trace.json_data.as_str()) {
                 Ok(data) => {
-                    let quantity = Asset::from(data.quantity.as_str());
+                    let quantity = match data.quantity.parse::<Asset>() {
+                        Ok(asset) => asset,
+                        Err(e) => {
+                            log::info!("Error parsing transfer asset in trx {}: {:?}", trx.id, e);
+                            return None;
+                        }
+                    };
                     let symcode = quantity.symbol.code().to_string();
                     let precision = quantity.symbol.precision().into();
                     let amount = quantity.amount;
