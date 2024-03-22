@@ -9,71 +9,53 @@ use antelope::{Symbol, Asset, Name, SymbolCode};
 
 #[substreams::handlers::map]
 fn map_accounts(block: Block) -> Result<Accounts, Error> {
-    let mut items = vec![];
 
-    for trx in block.executed_transaction_traces() {
-        for db_op in &trx.db_ops {
+    let items = block.executed_transaction_traces().flat_map(|trx| {
+        trx.db_ops.iter().filter_map(|db_op| {
             if db_op.table_name != "accounts" {
-                continue;
+                return None;
             }
-
-            let contract = db_op.code.clone();
-            let raw_primary_key = Name::from(db_op.primary_key.as_str()).value;
-            let symcode = SymbolCode::from(raw_primary_key);
-            let account = db_op.scope.clone();
 
             let old_data = abi::Account::try_from(db_op.old_data_json.as_str()).ok();
             let new_data = abi::Account::try_from(db_op.new_data_json.as_str()).ok();
-            if old_data.is_none() && new_data.is_none() {
-                continue;
-            } // no data
 
-            let old_balance = match &old_data {
-                Some(data) => match data.balance.parse::<Asset>() {
-                    Ok(asset) => Some(asset),
-                    Err(e) => {
-                        log::info!("Error parsing old balance asset: {:?}", e);
-                        continue;
-                    }
-                },
-                None => None,
-            };
-            let new_balance = match &new_data {
-                Some(data) => match data.balance.parse::<Asset>() {
-                    Ok(asset) => Some(asset),
-                    Err(e) => {
-                        log::info!("Error parsing new balance asset: {:?}", e);
-                        continue;
-                    }
-                },
-                None => None,
-            };
-            let precision = match new_balance.is_some() {
-                true => new_balance.unwrap().symbol.precision(),
-                false => old_balance.unwrap().symbol.precision(),
-            };
+            let old_balance = old_data.as_ref().and_then(|data| match data.balance.parse::<Asset>() {
+                Ok(asset) => Some(asset),
+                Err(e) => {
+                    log::info!("Error parsing old balance asset in trx {}: {:?}", trx.id, e);
+                    return None;
+                }
+            });
+            let new_balance = new_data.as_ref().and_then(|data| match data.balance.parse::<Asset>() {
+                Ok(asset) => Some(asset),
+                Err(e) => {
+                    log::info!("Error parsing new balance asset in trx {}: {:?}", trx.id, e);
+                    return None;
+                }
+            });
+
+            if old_balance.is_none() && new_balance.is_none() {
+                return None;
+            }
+
+            let raw_primary_key = Name::from(db_op.primary_key.as_str()).value;
+            let symcode = SymbolCode::from(raw_primary_key);
+            let precision = new_balance.unwrap_or_else(|| old_balance.unwrap()).symbol.precision();
             let sym = Symbol::from_precision(symcode, precision);
-            let balance = match new_balance.is_some() {
-                true => new_balance.unwrap(),
-                false => Asset::from_amount(0, sym),
-            };
+            let balance = new_balance.unwrap_or_else(|| Asset::from_amount(0, sym));
+            let balance_delta = balance.amount - old_balance.unwrap_or_else(|| Asset::from_amount(0, sym)).amount;
 
-            let balance_delta = match old_balance.is_some() {
-                true => balance.amount - old_balance.unwrap().amount,
-                false => balance.amount,
-            };
-
-            items.push(Account {
+            Some(Account {
                 // trace information
                 trx_id: trx.id.clone(),
                 action_index: db_op.action_index,
 
                 // contract & scope
-                contract,
+                contract: db_op.code.clone(),
                 symcode: symcode.to_string(),
 
                 // payload
-                account,
+                account: db_op.scope.clone(),
                 balance: balance.to_string(),
                 balance_delta,
 
@@ -84,68 +66,67 @@ fn map_accounts(block: Block) -> Result<Accounts, Error> {
 
                 block_num: block.number as u64,
                 timestamp: block.header.as_ref().unwrap().timestamp.clone(),
-            });
-        }
-    }
+            })
+        })
+    }).collect();
+
     Ok(Accounts { items })
 }
 
 #[substreams::handlers::map]
 fn map_stat(block: Block) -> Result<Stats, Error> {
-    let mut items = vec![];
-
-    for trx in block.executed_transaction_traces() {
-        for db_op in &trx.db_ops {
+    let items = block.executed_transaction_traces().flat_map(|trx| {
+        trx.db_ops.iter().filter_map(|db_op| {
             if db_op.table_name != "stat" {
-                continue;
+                return None;
             }
 
-            let contract = db_op.code.clone();
-            let raw_primary_key = Name::from(db_op.primary_key.as_str()).value;
-            let symcode = SymbolCode::from(raw_primary_key);
+            let raw_primary_key = match db_op.primary_key.parse::<Name>() {
+                Ok(name) => name.value,
+                Err(e) => {
+                    log::info!("Error parsing primary key as name in trx {}: {:?}", trx.id, e);
+                    return None;
+                }
+            };
 
             let old_data = abi::CurrencyStats::try_from(db_op.old_data_json.as_str()).ok();
             let new_data = abi::CurrencyStats::try_from(db_op.new_data_json.as_str()).ok();
-            if old_data.is_none() && new_data.is_none() {
-                continue;
-            } // no data
 
-            let old_supply = match &old_data {
-                Some(data) => Some(Asset::from(data.supply.as_str())),
-                None => None,
-            };
-            let new_supply = match &new_data {
-                Some(data) => Some(Asset::from(data.supply.as_str())),
-                None => None,
-            };
-            let precision = match new_supply.is_some() {
-                true => new_supply.unwrap().symbol.precision(),
-                false => old_supply.unwrap().symbol.precision(),
-            };
-            let sym = Symbol::from_precision(symcode, precision);
-            let supply = match new_supply.is_some() {
-                true => new_supply.unwrap(),
-                false => Asset::from_amount(0, sym),
-            };
+            let old_supply = old_data.as_ref().and_then(|data| match data.supply.parse::<Asset>() {
+                Ok(asset) => Some(asset),
+                Err(e) => {
+                    log::info!("Error parsing old supply asset in trx {}: {:?}", trx.id, e);
+                    return None;
+                }
+            });
 
-            let supply_delta = match old_supply.is_some() {
-                true => supply.amount - old_supply.unwrap().amount,
-                false => supply.amount,
-            };
+            let new_supply = new_data.as_ref().and_then(|data| match data.supply.parse::<Asset>() {
+                Ok(asset) => Some(asset),
+                Err(e) => {
+                    log::info!("Error parsing new supply asset in trx {}: {:?}", trx.id, e);
+                    return None;
+                }
+            });
 
-            // Skip if no new data
-            if new_data.is_none() {
-                continue;
+            if old_supply.is_none() && new_supply.is_none() {
+                return None;
             }
-            let data = new_data.unwrap();
 
-            items.push(Stat {
+            let symcode = SymbolCode::from(raw_primary_key);
+            let precision = new_supply.unwrap_or_else(|| old_supply.unwrap()).symbol.precision();
+            let sym = Symbol::from_precision(symcode, precision);
+            let supply = new_supply.unwrap_or_else(|| Asset::from_amount(0, sym));
+            let supply_delta = supply.amount - old_supply.unwrap_or_else(|| Asset::from_amount(0, sym)).amount;
+
+            let data = new_data.unwrap_or_else(|| old_data.unwrap());
+
+            Some(Stat {
                 // trace information
                 trx_id: trx.id.clone(),
                 action_index: db_op.action_index,
 
                 // contract & scope
-                contract,
+                contract: db_op.code.clone(),
                 symcode: symcode.to_string(),
 
                 // payload
@@ -161,25 +142,22 @@ fn map_stat(block: Block) -> Result<Stats, Error> {
 
                 block_num: block.number as u64,
                 timestamp: block.header.as_ref().unwrap().timestamp.clone(),
-            });
-        }
-    }
+            })
+        })
+    })
+    .collect();
+
     Ok(Stats { items })
 }
 
 #[substreams::handlers::map]
 fn map_transfers(block: Block) -> Result<TransferEvents, Error> {
-    let mut response = vec![];
 
-    for trx in block.executed_transaction_traces() {
-        // action traces
-        for trace in &trx.action_traces {
+    let items = block.executed_transaction_traces().flat_map(|trx| {
+        trx.action_traces.iter().filter_map(|trace| {
             let action_trace = trace.action.as_ref().unwrap();
-            if action_trace.account != trace.receiver {
-                continue;
-            }
-            if action_trace.name != "transfer" {
-                continue;
+            if action_trace.name != "transfer" || action_trace.account != trace.receiver {
+                return None;
             }
 
             match abi::Transfer::try_from(action_trace.json_data.as_str()) {
@@ -188,17 +166,14 @@ fn map_transfers(block: Block) -> Result<TransferEvents, Error> {
                     let symcode = quantity.symbol.code().to_string();
                     let precision = quantity.symbol.precision().into();
                     let amount = quantity.amount;
-                    let contract = action_trace.account.clone();
 
-                    // log::debug!("symcode: {:?}", symcode);
-
-                    response.push(TransferEvent {
+                    Some(TransferEvent {
                         // trace information
                         trx_id: trx.id.clone(),
                         action_index: trace.action_ordinal,
 
                         // contract & scope
-                        contract,
+                        contract: action_trace.account.clone(),
                         action: action_trace.name.clone(),
                         symcode,
 
@@ -215,11 +190,13 @@ fn map_transfers(block: Block) -> Result<TransferEvents, Error> {
 
                         block_num: block.number as u64,
                         timestamp: block.header.as_ref().unwrap().timestamp.clone(),
-                    });
+                    })
                 }
-                Err(_) => continue,
+                Err(_) => return None,
             }
-        }
-    }
-    Ok(TransferEvents { items: response })
+        })
+    })
+    .collect();
+
+    Ok(TransferEvents { items })
 }
