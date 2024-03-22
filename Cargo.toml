@@ -1,6 +1,6 @@
 [package]
 name = "antelope_tokens"
-version = "0.3.6"
+version = "0.3.7"
 authors = [
     "Denis <denis@pinax.network>",
     "Yaro <yaro@pinax.network>",
