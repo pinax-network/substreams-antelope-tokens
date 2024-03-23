@@ -1,6 +1,6 @@
 use substreams::errors::Error;
 use substreams::log;
-use substreams_antelope::pb::Block;
+use substreams_antelope::{pb::Block, Action, decoder::decode};
 
 use crate::abi;
 use crate::eosio_token::*;
@@ -10,14 +10,14 @@ use antelope::{Symbol, Asset, Name, SymbolCode};
 #[substreams::handlers::map]
 fn map_accounts(block: Block) -> Result<Accounts, Error> {
 
-    let items = block.executed_transaction_traces().flat_map(|trx| {
+    let items = block.transaction_traces().flat_map(|trx| {
         trx.db_ops.iter().filter_map(|db_op| {
             if db_op.table_name != "accounts" {
                 return None;
             }
 
-            let old_data = abi::Account::try_from(db_op.old_data_json.as_str()).ok();
-            let new_data = abi::Account::try_from(db_op.new_data_json.as_str()).ok();
+            let old_data = decode::<abi::types::Account>(&db_op.old_data_json).ok();
+            let new_data = decode::<abi::types::Account>(&db_op.new_data_json).ok();
 
             let old_balance = old_data.as_ref().and_then(|data| match data.balance.parse::<Asset>() {
                 Ok(asset) => Some(asset),
@@ -75,7 +75,7 @@ fn map_accounts(block: Block) -> Result<Accounts, Error> {
 
 #[substreams::handlers::map]
 fn map_stat(block: Block) -> Result<Stats, Error> {
-    let items = block.executed_transaction_traces().flat_map(|trx| {
+    let items = block.transaction_traces().flat_map(|trx| {
         trx.db_ops.iter().filter_map(|db_op| {
             if db_op.table_name != "stat" {
                 return None;
@@ -89,8 +89,8 @@ fn map_stat(block: Block) -> Result<Stats, Error> {
                 }
             };
 
-            let old_data = abi::CurrencyStats::try_from(db_op.old_data_json.as_str()).ok();
-            let new_data = abi::CurrencyStats::try_from(db_op.new_data_json.as_str()).ok();
+            let old_data = decode::<abi::types::CurrencyStats>(&db_op.old_data_json).ok();
+            let new_data = decode::<abi::types::CurrencyStats>(&db_op.new_data_json).ok();
 
             let old_supply = old_data.as_ref().and_then(|data| match data.supply.parse::<Asset>() {
                 Ok(asset) => Some(asset),
@@ -153,14 +153,14 @@ fn map_stat(block: Block) -> Result<Stats, Error> {
 #[substreams::handlers::map]
 fn map_transfers(block: Block) -> Result<TransferEvents, Error> {
 
-    let items = block.executed_transaction_traces().flat_map(|trx| {
+    let items = block.transaction_traces().flat_map(|trx| {
         trx.action_traces.iter().filter_map(|trace| {
             let action_trace = trace.action.as_ref().unwrap();
             if action_trace.name != "transfer" || action_trace.account != trace.receiver {
                 return None;
             }
 
-            match abi::Transfer::try_from(action_trace.json_data.as_str()) {
+            match abi::actions::Transfer::decode(&trace) {
                 Ok(data) => {
                     let quantity = match data.quantity.parse::<Asset>() {
                         Ok(asset) => asset,
