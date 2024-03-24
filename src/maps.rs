@@ -153,16 +153,9 @@ fn map_stat(block: Block) -> Result<Stats, Error> {
 #[substreams::handlers::map]
 fn map_transfers(block: Block) -> Result<TransferEvents, Error> {
 
-    let items = block.transaction_traces().flat_map(|trx| {
-        trx.action_traces.iter().filter_map(|trace| {
-            let action_trace = trace.action.as_ref().unwrap();
-            if action_trace.name != "transfer" || action_trace.account != trace.receiver {
-                return None;
-            }
+    let items = block.actions::<abi::actions::Transfer>(&[]).filter_map(|(action, action_trace, trx)| {
 
-            match abi::actions::Transfer::decode(&trace) {
-                Ok(data) => {
-                    let quantity = match data.quantity.parse::<Asset>() {
+        let quantity = match action.quantity.parse::<Asset>() {
             Ok(asset) => asset,
             Err(e) => {
                 log::info!("Error parsing transfer asset in trx {}: {:?}", trx.id, e);
@@ -174,32 +167,24 @@ fn map_transfers(block: Block) -> Result<TransferEvents, Error> {
         let amount = quantity.amount;
 
         Some(TransferEvent {
-                        // trace information
             trx_id: trx.id.clone(),
-                        action_index: trace.action_ordinal,
+            action_index: action_trace.action_ordinal,
 
-                        // contract & scope
-                        contract: action_trace.account.clone(),
-                        action: action_trace.name.clone(),
+            contract: action_trace.action.as_ref().unwrap().account.clone(),
+            action: action_trace.action.as_ref().unwrap().name.clone(),
             symcode,
 
-                        // payload
-                        from: data.from,
-                        to: data.to,
-                        quantity: data.quantity,
-                        memo: data.memo,
+            from: action.from,
+            to: action.to,
+            quantity: action.quantity,
+            memo: action.memo,
 
-                        // extras
             precision,
             amount,
             value: utils::to_value(&quantity),
 
             block_num: block.number as u64,
             timestamp: block.header.as_ref().unwrap().timestamp.clone(),
-                    })
-                }
-                Err(_) => return None,
-            }
         })
     })
     .collect();
