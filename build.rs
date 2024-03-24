@@ -1,4 +1,3 @@
-
 fn main() {
     substreams_antelope::Abigen::new("Contract", "abi/eosio.token.abi.json")
         .expect("failed to load abi")

@@ -1,11 +1,11 @@
 use substreams::errors::Error;
 use substreams::log;
-use substreams_antelope::{pb::Block, Action, decoder::decode};
+use substreams_antelope::{pb::Block, decoder::decode};
+use antelope::{Symbol, Asset, Name, SymbolCode};
 
 use crate::abi;
 use crate::eosio_token::*;
 use crate::utils;
-use antelope::{Symbol, Asset, Name, SymbolCode};
 
 #[substreams::handlers::map]
 fn map_accounts(block: Block) -> Result<Accounts, Error> {
@@ -23,14 +23,14 @@ fn map_accounts(block: Block) -> Result<Accounts, Error> {
                 Ok(asset) => Some(asset),
                 Err(e) => {
                     log::info!("Error parsing old balance asset in trx {}: {:?}", trx.id, e);
-                    return None;
+                    None
                 }
             });
             let new_balance = new_data.as_ref().and_then(|data| match data.balance.parse::<Asset>() {
                 Ok(asset) => Some(asset),
                 Err(e) => {
                     log::info!("Error parsing new balance asset in trx {}: {:?}", trx.id, e);
-                    return None;
+                    None
                 }
             });
 
@@ -96,7 +96,7 @@ fn map_stat(block: Block) -> Result<Stats, Error> {
                 Ok(asset) => Some(asset),
                 Err(e) => {
                     log::info!("Error parsing old supply asset in trx {}: {:?}", trx.id, e);
-                    return None;
+                    None
                 }
             });
 
@@ -104,7 +104,7 @@ fn map_stat(block: Block) -> Result<Stats, Error> {
                 Ok(asset) => Some(asset),
                 Err(e) => {
                     log::info!("Error parsing new supply asset in trx {}: {:?}", trx.id, e);
-                    return None;
+                    None
                 }
             });
 
@@ -163,25 +163,25 @@ fn map_transfers(block: Block) -> Result<TransferEvents, Error> {
             match abi::actions::Transfer::decode(&trace) {
                 Ok(data) => {
                     let quantity = match data.quantity.parse::<Asset>() {
-                        Ok(asset) => asset,
-                        Err(e) => {
-                            log::info!("Error parsing transfer asset in trx {}: {:?}", trx.id, e);
-                            return None;
-                        }
-                    };
-                    let symcode = quantity.symbol.code().to_string();
-                    let precision = quantity.symbol.precision().into();
-                    let amount = quantity.amount;
+            Ok(asset) => asset,
+            Err(e) => {
+                log::info!("Error parsing transfer asset in trx {}: {:?}", trx.id, e);
+                return None;
+            }
+        };
+        let symcode = quantity.symbol.code().to_string();
+        let precision = quantity.symbol.precision().into();
+        let amount = quantity.amount;
 
-                    Some(TransferEvent {
+        Some(TransferEvent {
                         // trace information
-                        trx_id: trx.id.clone(),
+            trx_id: trx.id.clone(),
                         action_index: trace.action_ordinal,
 
                         // contract & scope
                         contract: action_trace.account.clone(),
                         action: action_trace.name.clone(),
-                        symcode,
+            symcode,
 
                         // payload
                         from: data.from,
@@ -190,12 +190,12 @@ fn map_transfers(block: Block) -> Result<TransferEvents, Error> {
                         memo: data.memo,
 
                         // extras
-                        precision,
-                        amount,
-                        value: utils::to_value(&quantity),
+            precision,
+            amount,
+            value: utils::to_value(&quantity),
 
-                        block_num: block.number as u64,
-                        timestamp: block.header.as_ref().unwrap().timestamp.clone(),
+            block_num: block.number as u64,
+            timestamp: block.header.as_ref().unwrap().timestamp.clone(),
                     })
                 }
                 Err(_) => return None,
