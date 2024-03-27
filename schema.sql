@@ -17,19 +17,19 @@ CREATE TABLE IF NOT EXISTS cursors
 -- Tables to store the raw events without any processing --
 -----------------------------------------------------------
 
+-- The table to store all transfers. This uses the trx_id as first primary key so we can use this table to do
+-- transfer lookups based on a transaction id.
 CREATE TABLE IF NOT EXISTS transfer_events
 (
-    id           String,
-    -- trace information
     trx_id       String,
     action_index UInt32,
     -- contract & scope --
-    contract     FixedString(12),
+    contract     String,
     action       String,
     symcode      String,
     -- data payload --
-    from         FixedString(12),
-    to           FixedString(12),
+    from         String,
+    to           String,
     quantity     String,
     memo         String,
     -- extras --
@@ -41,20 +41,20 @@ CREATE TABLE IF NOT EXISTS transfer_events
     timestamp    DateTime
 )
     ENGINE = ReplacingMergeTree()
-        PRIMARY KEY (id)
-        ORDER BY (id);
+        PRIMARY KEY (trx_id, action_index)
+        ORDER BY (trx_id, action_index);
 
+-- The table to store all account balance changes. This uses the account and block_num as first primary keys so we can
+-- use this table to lookup the account balance from a certain block number.
 CREATE TABLE IF NOT EXISTS account_events
 (
-    id            String,
-    -- trace information
     trx_id        String,
     action_index  UInt32,
     -- contract & scope --
-    contract      FixedString(12),
+    contract      String,
     symcode       String,
     -- data payload --
-    account       FixedString(12),
+    account       String,
     balance       String,
     balance_delta Int64,
     -- extras --
@@ -66,20 +66,20 @@ CREATE TABLE IF NOT EXISTS account_events
     timestamp     DateTime
 )
     ENGINE = ReplacingMergeTree()
-        PRIMARY KEY (id)
-        ORDER BY (id);
+        PRIMARY KEY (account, block_num, trx_id, action_index)
+        ORDER BY (account, block_num, trx_id, action_index);
 
+-- The table to store all token supply changes. This uses the account and block_num as first primary keys so we can
+-- use this table to lookup token supplies from a certain block number.
 CREATE TABLE IF NOT EXISTS token_events
 (
-    id           String,
-    -- trace information --
     trx_id       String,
     action_index UInt32,
     -- contract & scope --
-    contract     FixedString(12),
+    contract     String,
     symcode      String,
     -- data payload --
-    issuer       FixedString(12),
+    issuer       String,
     max_supply   String,
     supply       String,
     supply_delta Int64,
@@ -92,8 +92,8 @@ CREATE TABLE IF NOT EXISTS token_events
     timestamp    DateTime
 )
     ENGINE = ReplacingMergeTree()
-        PRIMARY KEY (id)
-        ORDER BY (id);
+        PRIMARY KEY (contract, block_num, trx_id, action_index)
+        ORDER BY (contract, block_num, trx_id, action_index);
 
 
 -----------------------------------------------
@@ -103,9 +103,9 @@ CREATE TABLE IF NOT EXISTS token_events
 -- Table to store up to date balances per account and token --
 CREATE TABLE IF NOT EXISTS account_balances
 (
-    account              FixedString(12),
+    account              String,
 
-    contract             FixedString(12),
+    contract             String,
     symcode              String,
     balance              String,
 
@@ -123,10 +123,10 @@ CREATE TABLE IF NOT EXISTS account_balances
 -- Table to store up to date token supplies --
 CREATE TABLE IF NOT EXISTS token_balances
 (
-    contract             FixedString(12),
+    contract             String,
     symcode              String,
 
-    issuer               FixedString(12),
+    issuer               String,
     max_supply           String,
     supply               String,
 
@@ -147,12 +147,12 @@ CREATE TABLE IF NOT EXISTS transfers_from
     trx_id       String,
     action_index UInt32,
 
-    contract     FixedString(12),
+    contract     String,
     action       String,
     symcode      String,
 
-    from         FixedString(12),
-    to           FixedString(12),
+    from         String,
+    to           String,
     quantity     String,
     memo         String,
 
@@ -173,12 +173,12 @@ CREATE TABLE IF NOT EXISTS transfers_to
     trx_id       String,
     action_index UInt32,
 
-    contract     FixedString(12),
+    contract     String,
     action       String,
     symcode      String,
 
-    from         FixedString(12),
-    to           FixedString(12),
+    from         String,
+    to           String,
     quantity     String,
     memo         String,
 
