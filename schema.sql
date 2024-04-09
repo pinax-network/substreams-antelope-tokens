@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS account_events
 
 -- The table to store all token supply changes. This uses the account and block_num as first primary keys so we can
 -- use this table to lookup token supplies from a certain block number.
-CREATE TABLE IF NOT EXISTS token_events
+CREATE TABLE IF NOT EXISTS token_supply_events
 (
     trx_id       String,
     action_index UInt32,
@@ -224,7 +224,7 @@ SELECT contract,
        value,
        block_num AS updated_at_block_num,
        timestamp AS updated_at_timestamp
-FROM token_events;
+FROM token_supply_events;
 
 CREATE MATERIALIZED VIEW transfers_from_mv
     TO transfers_from
