@@ -121,7 +121,7 @@ CREATE TABLE IF NOT EXISTS account_balances
         ORDER BY (account, contract, symcode);
 
 -- Table to store up to date token supplies --
-CREATE TABLE IF NOT EXISTS token_balances
+CREATE TABLE IF NOT EXISTS token_supplies
 (
     contract             String,
     symcode              String,
@@ -211,8 +211,8 @@ SELECT account,
        timestamp AS updated_at_timestamp
 FROM account_events;
 
-CREATE MATERIALIZED VIEW token_balances_mv
-    TO token_balances
+CREATE MATERIALIZED VIEW token_supplies_mv
+    TO token_supplies
 AS
 SELECT contract,
        symcode,
