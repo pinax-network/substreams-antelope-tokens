@@ -3,18 +3,18 @@ use substreams::errors::Error;
 use substreams_database_change::pb::database::{table_change, DatabaseChanges};
 use substreams_entity_change::pb::entity::EntityChanges;
 
-use crate::eosio_token::{Accounts, Stats, TransferEvents};
+use crate::eosio_token::{Accounts, Stats, Events};
 use crate::utils::to_key;
 
 #[substreams::handlers::map]
 pub fn graph_out(
     map_accounts: Accounts,
     map_stats: Stats,
-    map_transfers: TransferEvents,
+    map_events: Events,
 ) -> Result<EntityChanges, Error> {
     let mut tables = substreams_entity_change::tables::Tables::new();
 
-    for account in map_accounts.items {
+    for account in map_accounts.changes {
         let key = to_key(&account.trx_id, account.action_index);
         tables
             .create_row("accounts", key)
@@ -34,7 +34,7 @@ pub fn graph_out(
             .set("value", account.value.to_string());
     }
 
-    for stat in map_stats.items {
+    for stat in map_stats.changes {
         let key = to_key(&stat.trx_id, stat.action_index);
         tables
             .create_row("stats", key)
@@ -55,7 +55,7 @@ pub fn graph_out(
             .set("value", stat.value.to_string());
     }
 
-    for transfer in map_transfers.items {
+    for transfer in map_events.transfers {
         let key = to_key(&transfer.trx_id, transfer.action_index);
         tables
             .create_row("transfers", key)
@@ -64,7 +64,6 @@ pub fn graph_out(
             .set("action_index", transfer.action_index.to_string())
             // contract & scope
             .set("contract", transfer.contract.to_string())
-            .set("action", transfer.action.to_string())
             .set("symcode", transfer.symcode.to_string())
             // data payload
             .set("from", transfer.from.to_string())
@@ -77,6 +76,66 @@ pub fn graph_out(
             .set("value", transfer.value.to_string());
     }
 
+    for issue in map_events.issues {
+        let key = to_key(&issue.trx_id, issue.action_index);
+        tables
+            .create_row("issues", key)
+            // transaction
+            .set("trx_id", issue.trx_id.to_string())
+            .set("action_index", issue.action_index.to_string())
+            // contract & scope
+            .set("contract", issue.contract.to_string())
+            .set("symcode", issue.symcode.to_string())
+            // data payload
+            .set("issuer", issue.issuer.to_string())
+            .set("to", issue.to.to_string())
+            .set("memo", issue.memo.to_string())
+            .set("quantity", issue.quantity.to_string())
+            // extras
+            .set("amount", issue.amount.to_string())
+            .set("precision", issue.precision.to_string())
+            .set("value", issue.value.to_string());
+    }
+
+    for retire in map_events.retires {
+        let key = to_key(&retire.trx_id, retire.action_index);
+        tables
+            .create_row("retires", key)
+            // transaction
+            .set("trx_id", retire.trx_id.to_string())
+            .set("action_index", retire.action_index.to_string())
+            // contract & scope
+            .set("contract", retire.contract.to_string())
+            .set("symcode", retire.symcode.to_string())
+            // data payload
+            .set("quantity", retire.quantity.to_string())
+            .set("from", retire.from.to_string())
+            .set("memo", retire.memo.to_string())
+            // extras
+            .set("amount", retire.amount.to_string())
+            .set("precision", retire.precision.to_string())
+            .set("value", retire.value.to_string());
+    }
+
+    for create in map_events.creates {
+        let key = to_key(&create.trx_id, create.action_index);
+        tables
+            .create_row("creates", key)
+            // transaction
+            .set("trx_id", create.trx_id.to_string())
+            .set("action_index", create.action_index.to_string())
+            // contract & scope
+            .set("contract", create.contract.to_string())
+            .set("symcode", create.symcode.to_string())
+            // data payload
+            .set("issuer", create.issuer.to_string())
+            .set("maximum_supply", create.maximum_supply.to_string())
+            // extras
+            .set("amount", create.amount.to_string())
+            .set("precision", create.precision.to_string())
+            .set("value", create.value.to_string());
+    }
+
     Ok(tables.to_entity_changes())
 }
 
@@ -84,11 +143,11 @@ pub fn graph_out(
 pub fn ch_out(
     map_accounts: Accounts,
     map_stats: Stats,
-    map_transfers: TransferEvents,
+    map_events: Events,
 ) -> Result<DatabaseChanges, Error> {
     let mut tables = DatabaseChanges::default();
 
-    for account in map_accounts.items {
+    for account in map_accounts.changes {
         let keys = HashMap::from([
             ("account".to_string(), account.account.to_string()),
             ("block_num".to_string(), account.block_num.to_string()),
@@ -108,7 +167,7 @@ pub fn ch_out(
             .change("timestamp", ("", account.timestamp.unwrap().to_string().as_str()));
     }
 
-    for stat in map_stats.items {
+    for stat in map_stats.changes {
         let keys = HashMap::from([
             ("contract".to_string(), stat.contract.to_string()),
             ("block_num".to_string(), stat.block_num.to_string()),
@@ -129,7 +188,7 @@ pub fn ch_out(
             .change("timestamp", ("", stat.timestamp.unwrap().to_string().as_str()));
     }
 
-    for transfer in map_transfers.items {
+    for transfer in map_events.transfers {
         let keys = HashMap::from([
             ("trx_id".to_string(), transfer.trx_id),
             ("action_index".to_string(), transfer.action_index.to_string()),
@@ -138,7 +197,6 @@ pub fn ch_out(
         tables
             .push_change_composite("transfer_events", keys, 0, table_change::Operation::Create)
             .change("contract", ("", transfer.contract.to_string().as_str()))
-            .change("action", ("", transfer.action.to_string().as_str()))
             .change("symcode", ("", transfer.symcode.to_string().as_str()))
             .change("from", ("", transfer.from.to_string().as_str()))
             .change("to", ("", transfer.to.to_string().as_str()))
