@@ -3,18 +3,16 @@ use substreams::errors::Error;
 use substreams_database_change::pb::database::{table_change, DatabaseChanges};
 use substreams_entity_change::pb::entity::EntityChanges;
 
-use crate::eosio_token::{Accounts, Stats, Events};
+use crate::eosio_token::Events;
 use crate::utils::to_key;
 
 #[substreams::handlers::map]
 pub fn graph_out(
-    map_accounts: Accounts,
-    map_stats: Stats,
     map_events: Events,
 ) -> Result<EntityChanges, Error> {
     let mut tables = substreams_entity_change::tables::Tables::new();
 
-    for account in map_accounts.changes {
+    for account in map_events.balance_changes {
         let key = to_key(&account.trx_id, account.action_index);
         tables
             .create_row("accounts", key)
@@ -34,7 +32,7 @@ pub fn graph_out(
             .set("value", account.value.to_string());
     }
 
-    for stat in map_stats.changes {
+    for stat in map_events.supply_changes {
         let key = to_key(&stat.trx_id, stat.action_index);
         tables
             .create_row("stats", key)
@@ -141,13 +139,11 @@ pub fn graph_out(
 
 #[substreams::handlers::map]
 pub fn ch_out(
-    map_accounts: Accounts,
-    map_stats: Stats,
     map_events: Events,
 ) -> Result<DatabaseChanges, Error> {
     let mut tables = DatabaseChanges::default();
 
-    for account in map_accounts.changes {
+    for account in map_events.balance_changes {
         let keys = HashMap::from([
             ("account".to_string(), account.account.to_string()),
             ("block_num".to_string(), account.block_num.to_string()),
@@ -167,7 +163,7 @@ pub fn ch_out(
             .change("timestamp", ("", account.timestamp.unwrap().to_string().as_str()));
     }
 
-    for stat in map_stats.changes {
+    for stat in map_events.supply_changes {
         let keys = HashMap::from([
             ("contract".to_string(), stat.contract.to_string()),
             ("block_num".to_string(), stat.block_num.to_string()),

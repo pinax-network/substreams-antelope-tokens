@@ -4,68 +4,13 @@ package antelope.eosio.token.v1;
 
 import "google/protobuf/timestamp.proto";
 
-message Accounts {
-  repeated Account changes = 1;
-}
-
-message Account {
-  // trace information
-  string trx_id = 1;
-  uint32 action_index = 2;
-
-  // contract & scope
-  string contract = 3;
-  string symcode = 4;
-
-  // data payload
-  string account = 5;
-  string balance = 6;
-  int64 balance_delta = 7;
-
-  // extras
-  uint32 precision = 10;
-  int64 amount = 11;
-  double value = 12;
-
-  // block information
-  uint64 block_num = 13;
-  google.protobuf.Timestamp timestamp = 14;
-}
-
-message Stats {
-  repeated Stat changes = 1;
-}
-
-message Stat {
-  // trace information
-  string trx_id = 1;
-  uint32 action_index = 2;
-
-  // contract & scope
-  string contract = 3;
-  string symcode = 4;
-
-  // data payload
-  string issuer = 5;
-  string max_supply = 6;
-  string supply = 7;
-  int64 supply_delta = 8;
-
-  // extras
-  uint32 precision = 10;
-  int64 amount = 11;
-  double value = 12;
-
-  // block information
-  uint64 block_num = 13;
-  google.protobuf.Timestamp timestamp = 14;
-}
-
 message Events {
   repeated Transfer transfers = 1;
   repeated Issue issues = 2;
   repeated Retire retires = 3;
   repeated Create creates = 4;
+  repeated BalanceChange balance_changes = 5;
+  repeated SupplyChange supply_changes = 6;
 }
 
 message Transfer {
@@ -163,4 +108,53 @@ message Create {
   // block information
   uint64 block_num = 11;
   google.protobuf.Timestamp timestamp = 12;
+}
+
+message BalanceChange {
+  // trace information
+  string trx_id = 1;
+  uint32 action_index = 2;
+
+  // contract & scope
+  string contract = 3;
+  string symcode = 4;
+
+  // data payload
+  string account = 5;
+  string balance = 6;
+  int64 balance_delta = 7;
+
+  // extras
+  uint32 precision = 10;
+  int64 amount = 11;
+  double value = 12;
+
+  // block information
+  uint64 block_num = 13;
+  google.protobuf.Timestamp timestamp = 14;
+}
+
+message SupplyChange {
+  // trace information
+  string trx_id = 1;
+  uint32 action_index = 2;
+
+  // contract & scope
+  string contract = 3;
+  string symcode = 4;
+
+  // data payload
+  string issuer = 5;
+  string max_supply = 6;
+  string supply = 7;
+  int64 supply_delta = 8;
+
+  // extras
+  uint32 precision = 10;
+  int64 amount = 11;
+  double value = 12;
+
+  // block information
+  uint64 block_num = 13;
+  google.protobuf.Timestamp timestamp = 14;
 }
