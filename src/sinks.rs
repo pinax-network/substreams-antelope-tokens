@@ -117,7 +117,7 @@ pub fn ch_out(
         ]);
 
         tables
-            .push_change_composite("token_events", keys, 0, table_change::Operation::Create)
+            .push_change_composite("token_supply_events", keys, 0, table_change::Operation::Create)
             .change("symcode", ("", stat.symcode.to_string().as_str()))
             .change("issuer", ("", stat.issuer.to_string().as_str()))
             .change("max_supply", ("", stat.max_supply.to_string().as_str()))
