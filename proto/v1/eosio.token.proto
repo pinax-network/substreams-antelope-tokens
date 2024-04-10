@@ -4,11 +4,113 @@ package antelope.eosio.token.v1;
 
 import "google/protobuf/timestamp.proto";
 
-message Accounts {
-  repeated Account items = 1;
+message Events {
+  repeated Transfer transfers = 1;
+  repeated Issue issues = 2;
+  repeated Retire retires = 3;
+  repeated Create creates = 4;
+  repeated BalanceChange balance_changes = 5;
+  repeated SupplyChange supply_changes = 6;
 }
 
-message Account {
+message Transfer {
+  // trace information
+  string trx_id = 1;
+  uint32 action_index = 2;
+
+  // contract & scope
+  string contract = 3;
+  string symcode = 5;
+
+  // data payload
+  string from = 6;
+  string to = 7;
+  string quantity = 8;
+  string memo = 9;
+
+  // extras
+  uint32 precision = 10;
+  int64 amount = 11;
+  double value = 12;
+
+  // block information
+  uint64 block_num = 13;
+  google.protobuf.Timestamp timestamp = 14;
+}
+
+message Issue {
+  // trace information
+  string trx_id = 1;
+  uint32 action_index = 2;
+
+  // contract & scope
+  string contract = 3;
+  string symcode = 4;
+
+  // data payload
+  string issuer = 5;
+  string to = 6;
+  string quantity = 7;
+  string memo = 8;
+
+  // extras
+  uint32 precision = 9;
+  int64 amount = 10;
+  double value = 11;
+
+  // block information
+  uint64 block_num = 12;
+  google.protobuf.Timestamp timestamp = 13;
+}
+
+message Retire {
+  // trace information
+  string trx_id = 1;
+  uint32 action_index = 2;
+
+  // contract & scope
+  string contract = 3;
+  string symcode = 5;
+
+  // data payload
+  string from = 6;
+  string quantity = 7;
+  string memo = 8;
+
+  // extras
+  uint32 precision = 9;
+  int64 amount = 10;
+  double value = 11;
+
+  // block information
+  uint64 block_num = 12;
+  google.protobuf.Timestamp timestamp = 13;
+}
+
+message Create {
+  // trace information
+  string trx_id = 1;
+  uint32 action_index = 2;
+
+  // contract & scope
+  string contract = 3;
+  string symcode = 5;
+
+  // data payload
+  string issuer = 6;
+  string maximum_supply = 7;
+
+  // extras
+  uint32 precision = 8;
+  int64 amount = 9;
+  double value = 10;
+
+  // block information
+  uint64 block_num = 11;
+  google.protobuf.Timestamp timestamp = 12;
+}
+
+message BalanceChange {
   // trace information
   string trx_id = 1;
   uint32 action_index = 2;
@@ -32,11 +134,7 @@ message Account {
   google.protobuf.Timestamp timestamp = 14;
 }
 
-message Stats {
-  repeated Stat items = 1;
-}
-
-message Stat {
+message SupplyChange {
   // trace information
   string trx_id = 1;
   uint32 action_index = 2;
@@ -50,36 +148,6 @@ message Stat {
   string max_supply = 6;
   string supply = 7;
   int64 supply_delta = 8;
-
-  // extras
-  uint32 precision = 10;
-  int64 amount = 11;
-  double value = 12;
-
-  // block information
-  uint64 block_num = 13;
-  google.protobuf.Timestamp timestamp = 14;
-}
-
-message TransferEvents {
-  repeated TransferEvent items = 1;
-}
-
-message TransferEvent {
-  // trace information
-  string trx_id = 1;
-  uint32 action_index = 2;
-
-  // contract & scope
-  string contract = 3;
-  string action = 4;
-  string symcode = 5;
-
-  // data payload
-  string from = 6;
-  string to = 7;
-  string quantity = 8;
-  string memo = 9;
 
   // extras
   uint32 precision = 10;

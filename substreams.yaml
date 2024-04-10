@@ -1,13 +1,13 @@
 specVersion: v0.1.0
 package:
   name: antelope_tokens
-  version: v0.3.9
+  version: v0.4.0
   url: https://github.com/pinax-network/substreams-antelope-tokens
   doc: Antelope `eosio.token` based action traces & database operations.
 
 imports:
   entities: https://github.com/streamingfast/substreams-sink-entity-changes/releases/download/v1.3.1/substreams-sink-entity-changes-v1.3.1.spkg
-  database_change: https://github.com/streamingfast/substreams-database-change/releases/download/v1.0.0/substreams-database-change-v1.0.0.spkg
+  database_change: https://github.com/streamingfast/substreams-database-change/releases/download/v1.3.1/substreams-database-change-v1.3.1.spkg
   sql: https://github.com/streamingfast/substreams-sink-sql/releases/download/protodefs-v1.0.3/substreams-sink-sql-protodefs-v1.0.3.spkg
 
 binaries:
@@ -22,42 +22,24 @@ protobuf:
     - ./proto/v1
 
 modules:
-  - name: map_transfers
+  - name: map_events
     kind: map
     inputs:
       - source: sf.antelope.type.v1.Block
     output:
-      type: proto:antelope.eosio.token.v1.TransferEvents
-
-  - name: map_accounts
-    kind: map
-    inputs:
-      - source: sf.antelope.type.v1.Block
-    output:
-      type: proto:antelope.eosio.token.v1.Accounts
-
-  - name: map_stat
-    kind: map
-    inputs:
-      - source: sf.antelope.type.v1.Block
-    output:
-      type: proto:antelope.eosio.token.v1.Stats
+      type: proto:antelope.eosio.token.v1.Events
 
   - name: graph_out
     kind: map
     inputs:
-      - map: map_accounts
-      - map: map_stat
-      - map: map_transfers
+      - map: map_events
     output:
       type: proto:sf.substreams.sink.entity.v1.EntityChanges
 
   - name: ch_out
     kind: map
     inputs:
-      - map: map_accounts
-      - map: map_stat
-      - map: map_transfers
+      - map: map_events
     output:
       type: proto:sf.substreams.sink.database.v1.DatabaseChanges
 

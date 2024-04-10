@@ -8,9 +8,134 @@ use crate::eosio_token::*;
 use crate::utils;
 
 #[substreams::handlers::map]
-fn map_accounts(block: Block) -> Result<Accounts, Error> {
+fn map_events(block: Block) -> Result<Events, Error> {
 
-    let items = block.transaction_traces().flat_map(|trx| {
+    let transfers = block.actions::<abi::actions::Transfer>(&[]).filter_map(|(action, action_trace, trx)| {
+
+        let quantity = match action.quantity.parse::<Asset>() {
+            Ok(asset) => asset,
+            Err(e) => {
+                log::info!("Error parsing transfer asset in trx {}: {:?}", trx.id, e);
+                return None;
+            }
+        };
+
+        Some(Transfer {
+            trx_id: trx.id.clone(),
+            action_index: action_trace.action_ordinal,
+
+            contract: action_trace.action.as_ref().unwrap().account.clone(),
+            symcode: quantity.symbol.code().to_string(),
+
+            from: action.from,
+            to: action.to,
+            quantity: action.quantity,
+            memo: action.memo,
+
+            precision: quantity.symbol.precision().into(),
+            amount: quantity.amount,
+            value: utils::to_value(&quantity),
+
+            block_num: block.number as u64,
+            timestamp: block.header.as_ref().unwrap().timestamp.clone(),
+        })
+    })
+    .collect();
+
+    let issues = block.actions::<abi::actions::Issue>(&[]).filter_map(|(action, action_trace, trx)| {
+
+        let quantity = match action.quantity.parse::<Asset>() {
+            Ok(asset) => asset,
+            Err(e) => {
+                log::info!("Error parsing issue asset in trx {}: {:?}", trx.id, e);
+                return None;
+            }
+        };
+
+        Some(Issue {
+            trx_id: trx.id.clone(),
+            action_index: action_trace.action_ordinal,
+
+            contract: action_trace.action.as_ref().unwrap().account.clone(),
+            symcode: quantity.symbol.code().to_string(),
+
+            issuer: action_trace.receiver.clone(),
+            to: action.to,
+            quantity: action.quantity,
+            memo: action.memo,
+
+            precision: quantity.symbol.precision().into(),
+            amount: quantity.amount,
+            value: utils::to_value(&quantity),
+
+            block_num: block.number as u64,
+            timestamp: block.header.as_ref().unwrap().timestamp.clone(),
+        })
+    })
+    .collect();
+
+    let retires = block.actions::<abi::actions::Retire>(&[]).filter_map(|(action, action_trace, trx)| {
+
+        let quantity = match action.quantity.parse::<Asset>() {
+            Ok(asset) => asset,
+            Err(e) => {
+                log::info!("Error parsing retire asset in trx {}: {:?}", trx.id, e);
+                return None;
+            }
+        };
+
+        Some(Retire {
+            trx_id: trx.id.clone(),
+            action_index: action_trace.action_ordinal,
+
+            contract: action_trace.action.as_ref().unwrap().account.clone(),
+            symcode: quantity.symbol.code().to_string(),
+
+            from: action_trace.receiver.clone(),
+            quantity: action.quantity,
+            memo: action.memo,
+
+            precision: quantity.symbol.precision().into(),
+            amount: quantity.amount,
+            value: utils::to_value(&quantity),
+
+            block_num: block.number as u64,
+            timestamp: block.header.as_ref().unwrap().timestamp.clone(),
+        })
+    })
+    .collect();
+
+    let creates = block.actions::<abi::actions::Create>(&[]).filter_map(|(action, action_trace, trx)| {
+
+        let maximum_supply = match action.maximum_supply.parse::<Asset>() {
+            Ok(asset) => asset,
+            Err(e) => {
+                log::info!("Error parsing create max supply asset in trx {}: {:?}", trx.id, e);
+                return None;
+            }
+        };
+
+        Some(Create {
+            trx_id: trx.id.clone(),
+            action_index: action_trace.action_ordinal,
+
+            contract: action_trace.action.as_ref().unwrap().account.clone(),
+            symcode: maximum_supply.symbol.code().to_string(),
+
+            issuer: action_trace.receiver.clone(),
+            maximum_supply: action.maximum_supply,
+
+            precision: maximum_supply.symbol.precision().into(),
+            amount: maximum_supply.amount,
+            value: utils::to_value(&maximum_supply),
+
+            block_num: block.number as u64,
+            timestamp: block.header.as_ref().unwrap().timestamp.clone(),
+        })
+    })
+    .collect();
+
+    let balance_changes = block.transaction_traces().flat_map(|trx| {
         trx.db_ops.iter().filter_map(|db_op| {
             if db_op.table_name != "accounts" {
                 return None;
@@ -45,7 +170,7 @@ fn map_accounts(block: Block) -> Result<Accounts, Error> {
             let balance = new_balance.unwrap_or_else(|| Asset::from_amount(0, sym));
             let balance_delta = balance.amount - old_balance.unwrap_or_else(|| Asset::from_amount(0, sym)).amount;
 
-            Some(Account {
+            Some(BalanceChange {
                 // trace information
                 trx_id: trx.id.clone(),
                 action_index: db_op.action_index,
@@ -70,24 +195,11 @@ fn map_accounts(block: Block) -> Result<Accounts, Error> {
         })
     }).collect();
 
-    Ok(Accounts { items })
-}
-
-#[substreams::handlers::map]
-fn map_stat(block: Block) -> Result<Stats, Error> {
-    let items = block.transaction_traces().flat_map(|trx| {
+    let supply_changes = block.transaction_traces().flat_map(|trx| {
         trx.db_ops.iter().filter_map(|db_op| {
             if db_op.table_name != "stat" {
                 return None;
             }
-
-            let raw_primary_key = match db_op.primary_key.parse::<Name>() {
-                Ok(name) => name.value,
-                Err(e) => {
-                    log::info!("Error parsing primary key as name in trx {}: {:?}", trx.id, e);
-                    return None;
-                }
-            };
 
             let old_data = decode::<abi::types::CurrencyStats>(&db_op.old_data_json).ok();
             let new_data = decode::<abi::types::CurrencyStats>(&db_op.new_data_json).ok();
@@ -112,7 +224,7 @@ fn map_stat(block: Block) -> Result<Stats, Error> {
                 return None;
             }
 
-            let symcode = SymbolCode::from(raw_primary_key);
+            let symcode = SymbolCode::from(Name::from(db_op.primary_key.as_str()).value);
             let precision = new_supply.unwrap_or_else(|| old_supply.unwrap()).symbol.precision();
             let sym = Symbol::from_precision(symcode, precision);
             let supply = new_supply.unwrap_or_else(|| Asset::from_amount(0, sym));
@@ -120,7 +232,7 @@ fn map_stat(block: Block) -> Result<Stats, Error> {
 
             let data = new_data.unwrap_or_else(|| old_data.unwrap());
 
-            Some(Stat {
+            Some(SupplyChange {
                 // trace information
                 trx_id: trx.id.clone(),
                 action_index: db_op.action_index,
@@ -144,50 +256,8 @@ fn map_stat(block: Block) -> Result<Stats, Error> {
                 timestamp: block.header.as_ref().unwrap().timestamp.clone(),
             })
         })
-    })
-    .collect();
+    }).collect();
 
-    Ok(Stats { items })
-}
 
-#[substreams::handlers::map]
-fn map_transfers(block: Block) -> Result<TransferEvents, Error> {
-
-    let items = block.actions::<abi::actions::Transfer>(&[]).filter_map(|(action, action_trace, trx)| {
-
-        let quantity = match action.quantity.parse::<Asset>() {
-            Ok(asset) => asset,
-            Err(e) => {
-                log::info!("Error parsing transfer asset in trx {}: {:?}", trx.id, e);
-                return None;
-            }
-        };
-        let symcode = quantity.symbol.code().to_string();
-        let precision = quantity.symbol.precision().into();
-        let amount = quantity.amount;
-
-        Some(TransferEvent {
-            trx_id: trx.id.clone(),
-            action_index: action_trace.action_ordinal,
-
-            contract: action_trace.action.as_ref().unwrap().account.clone(),
-            action: action_trace.action.as_ref().unwrap().name.clone(),
-            symcode,
-
-            from: action.from,
-            to: action.to,
-            quantity: action.quantity,
-            memo: action.memo,
-
-            precision,
-            amount,
-            value: utils::to_value(&quantity),
-
-            block_num: block.number as u64,
-            timestamp: block.header.as_ref().unwrap().timestamp.clone(),
-        })
-    })
-    .collect();
-
-    Ok(TransferEvents { items })
+    Ok(Events { transfers, issues, retires, creates, balance_changes, supply_changes })
 }
