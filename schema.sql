@@ -232,7 +232,7 @@ CREATE TABLE IF NOT EXISTS transfers_from
     block_num    UInt64,
     timestamp    DateTime
 )
-    ENGINE = ReplacingMergeTree(block_num)
+    ENGINE = ReplacingMergeTree()
         PRIMARY KEY (from, to, trx_id, action_index)
         ORDER BY (from, to, trx_id, action_index);
 
@@ -257,9 +257,34 @@ CREATE TABLE IF NOT EXISTS transfers_to
     block_num    UInt64,
     timestamp    DateTime
 )
-    ENGINE = ReplacingMergeTree(block_num)
+    ENGINE = ReplacingMergeTree()
         PRIMARY KEY (to, from, trx_id, action_index)
         ORDER BY (to, from, trx_id, action_index);
+
+-- Table to store token transfers primarily indexed by the 'block_num' field
+CREATE TABLE IF NOT EXISTS transfers_block_num
+(
+    trx_id       String,
+    action_index UInt32,
+
+    contract     String,
+    symcode      String,
+
+    from         String,
+    to           String,
+    quantity     String,
+    memo         String,
+
+    precision    UInt32,
+    amount       Int64,
+    value        Float64,
+
+    block_num    UInt64,
+    timestamp    DateTime
+)
+    ENGINE = ReplacingMergeTree()
+        PRIMARY KEY (block_num, trx_id, action_index)
+        ORDER BY (block_num, trx_id, action_index);
 
 ---------------------------------------------------------
 -- Materialized views to populate the extracted tables --
@@ -314,6 +339,24 @@ FROM transfer_events;
 
 CREATE MATERIALIZED VIEW transfers_to_mv
     TO transfers_to
+AS
+SELECT trx_id,
+       action_index,
+       contract,
+       symcode,
+       from,
+       to,
+       quantity,
+       memo,
+       precision,
+       amount,
+       value,
+       block_num,
+       timestamp
+FROM transfer_events;
+
+CREATE MATERIALIZED VIEW transfers_block_num_mv
+    TO transfers_block_num
 AS
 SELECT trx_id,
        action_index,
