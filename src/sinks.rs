@@ -152,7 +152,7 @@ pub fn ch_out(
         ]);
 
         tables
-            .push_change_composite("account_events", keys, 0, table_change::Operation::Create)
+            .push_change_composite("balance_change_events", keys, 0, table_change::Operation::Create)
             .change("contract", ("", account.contract.to_string().as_str()))
             .change("symcode", ("", account.symcode.to_string().as_str()))
             .change("balance", ("", account.balance.to_string().as_str()))
@@ -172,7 +172,7 @@ pub fn ch_out(
         ]);
 
         tables
-            .push_change_composite("token_supply_events", keys, 0, table_change::Operation::Create)
+            .push_change_composite("supply_change_events", keys, 0, table_change::Operation::Create)
             .change("symcode", ("", stat.symcode.to_string().as_str()))
             .change("issuer", ("", stat.issuer.to_string().as_str()))
             .change("max_supply", ("", stat.max_supply.to_string().as_str()))
@@ -203,6 +203,66 @@ pub fn ch_out(
             .change("value", ("", transfer.value.to_string().as_str()))
             .change("block_num", ("", transfer.block_num.to_string().as_str()))
             .change("timestamp", ("", transfer.timestamp.unwrap().to_string().as_str()));
+    }
+
+    for issue in map_events.issues {
+        let keys = HashMap::from([
+            ("contract".to_string(), issue.contract),
+            ("symcode".to_string(), issue.symcode),
+            ("to".to_string(), issue.to),
+            ("amount".to_string(), issue.amount.to_string()),
+            ("trx_id".to_string(), issue.trx_id),
+            ("action_index".to_string(), issue.action_index.to_string()),
+        ]);
+
+        tables
+            .push_change_composite("issue_events", keys, 0, table_change::Operation::Create)
+            .change("issuer", ("", issue.issuer.to_string().as_str()))
+            .change("quantity", ("", issue.quantity.to_string().as_str()))
+            .change("memo", ("", issue.memo.to_string().as_str()))
+            .change("precision", ("", issue.precision.to_string().as_str()))
+            .change("value", ("", issue.value.to_string().as_str()))
+            .change("block_num", ("", issue.block_num.to_string().as_str()))
+            .change("timestamp", ("", issue.timestamp.unwrap().to_string().as_str()));
+    }
+
+    for retire in map_events.retires {
+        let keys = HashMap::from([
+            ("contract".to_string(), retire.contract),
+            ("symcode".to_string(), retire.symcode),
+            ("amount".to_string(), retire.amount.to_string()),
+            ("trx_id".to_string(), retire.trx_id),
+            ("action_index".to_string(), retire.action_index.to_string()),
+        ]);
+
+        tables
+            .push_change_composite("retire_events", keys, 0, table_change::Operation::Create)
+            .change("from", ("", retire.from.to_string().as_str()))
+            .change("quantity", ("", retire.quantity.to_string().as_str()))
+            .change("memo", ("", retire.memo.to_string().as_str()))
+            .change("precision", ("", retire.precision.to_string().as_str()))
+            .change("value", ("", retire.value.to_string().as_str()))
+            .change("block_num", ("", retire.block_num.to_string().as_str()))
+            .change("timestamp", ("", retire.timestamp.unwrap().to_string().as_str()));
+    }
+
+    for create in map_events.creates {
+        let keys = HashMap::from([
+            ("contract".to_string(), create.contract),
+            ("symcode".to_string(), create.symcode),
+            ("trx_id".to_string(), create.trx_id),
+            ("action_index".to_string(), create.action_index.to_string()),
+        ]);
+
+        tables
+            .push_change_composite("create_events", keys, 0, table_change::Operation::Create)
+            .change("issuer", ("", create.issuer.to_string().as_str()))
+            .change("maximum_supply", ("", create.maximum_supply.to_string().as_str()))
+            .change("precision", ("", create.precision.to_string().as_str()))
+            .change("amount", ("", create.amount.to_string().as_str()))
+            .change("value", ("", create.value.to_string().as_str()))
+            .change("block_num", ("", create.block_num.to_string().as_str()))
+            .change("timestamp", ("", create.timestamp.unwrap().to_string().as_str()));
     }
 
     Ok(tables)
