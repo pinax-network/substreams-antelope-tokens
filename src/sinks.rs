@@ -4,143 +4,103 @@ use substreams_database_change::pb::database::{table_change, DatabaseChanges};
 use substreams_entity_change::pb::entity::EntityChanges;
 
 use crate::eosio_token::Events;
-use crate::utils::to_key;
+
+macro_rules! set_common_fields {
+    ($row:expr, $item:expr) => {
+        let timestamp = match $item.timestamp {
+            Some(ts) => ts.to_string(),
+            None => "".to_string(),
+        };
+
+        $row.set("trx_id", $item.trx_id.to_string())
+            .set("timestamp", timestamp)
+            .set("block_num", $item.block_num.to_string())
+            .set("action_index", $item.action_index.to_string())
+            .set("contract", $item.contract.to_string())
+            .set("symcode", $item.symcode.to_string())
+            .set("block_num", $item.block_num.to_string())
+            .set("precision", $item.precision.to_string())
+            .set("amount", $item.amount.to_string())
+            .set("value", $item.value.to_string());
+    };
+}
+
+macro_rules! unique_key {
+    ($item:expr) => {
+        format!(
+            "{}-{}-{}",
+            stringify!($item),
+            $item.trx_id,
+            $item.action_index
+        )
+    };
+}
 
 #[substreams::handlers::map]
-pub fn graph_out(
-    map_events: Events,
-) -> Result<EntityChanges, Error> {
+pub fn graph_out(map_events: Events) -> Result<EntityChanges, Error> {
     let mut tables = substreams_entity_change::tables::Tables::new();
 
     for account in map_events.balance_changes {
-        let key = to_key(&account.trx_id, account.action_index);
-        tables
-            .create_row("accounts", key)
-            // transaction
-            .set("trx_id", account.trx_id.to_string())
-            .set("action_index", account.action_index.to_string())
-            // contract & scope
-            .set("contract", account.contract.to_string())
-            .set("symcode", account.symcode.to_string())
-            // data payload
+        let row = tables
+            .create_row("Account", unique_key!(account))
             .set("account", account.account.to_string())
             .set("balance", account.balance.to_string())
-            .set("balance_delta", account.balance_delta.to_string())
-            // extras
-            .set("precision", account.precision.to_string())
-            .set("amount", account.amount.to_string())
-            .set("value", account.value.to_string());
+            .set("balance_delta", account.balance_delta.to_string());
+        set_common_fields!(row, account);
     }
 
     for stat in map_events.supply_changes {
-        let key = to_key(&stat.trx_id, stat.action_index);
-        tables
-            .create_row("stats", key)
-            // transaction
-            .set("trx_id", stat.trx_id.to_string())
-            .set("action_index", stat.action_index.to_string())
-            // contract & scope
-            .set("contract", stat.contract.to_string())
-            .set("symcode", stat.symcode.to_string())
-            // data payload
+        let row = tables
+            .create_row("Stat", unique_key!(stat))
             .set("issuer", stat.issuer.to_string())
             .set("max_supply", stat.max_supply.to_string())
             .set("supply", stat.supply.to_string())
-            .set("supply_delta", stat.supply_delta.to_string())
-            // extras
-            .set("precision", stat.precision.to_string())
-            .set("amount", stat.amount.to_string())
-            .set("value", stat.value.to_string());
+            .set("supply_delta", stat.supply_delta.to_string());
+        set_common_fields!(row, stat);
     }
 
     for transfer in map_events.transfers {
-        let key = to_key(&transfer.trx_id, transfer.action_index);
-        tables
-            .create_row("transfers", key)
-            // transaction
-            .set("trx_id", transfer.trx_id.to_string())
-            .set("action_index", transfer.action_index.to_string())
-            // contract & scope
-            .set("contract", transfer.contract.to_string())
-            .set("symcode", transfer.symcode.to_string())
-            // data payload
+        let row = tables
+            .create_row("Transfer", unique_key!(transfer))
             .set("from", transfer.from.to_string())
             .set("to", transfer.to.to_string())
             .set("memo", transfer.memo.to_string())
-            .set("quantity", transfer.quantity.to_string())
-            // extras
-            .set("amount", transfer.amount.to_string())
-            .set("precision", transfer.precision.to_string())
-            .set("value", transfer.value.to_string());
+            .set("quantity", transfer.quantity.to_string());
+        set_common_fields!(row, transfer);
     }
 
     for issue in map_events.issues {
-        let key = to_key(&issue.trx_id, issue.action_index);
-        tables
-            .create_row("issues", key)
-            // transaction
-            .set("trx_id", issue.trx_id.to_string())
-            .set("action_index", issue.action_index.to_string())
-            // contract & scope
-            .set("contract", issue.contract.to_string())
-            .set("symcode", issue.symcode.to_string())
-            // data payload
+        let row = tables
+            .create_row("Issue", unique_key!(issue))
             .set("issuer", issue.issuer.to_string())
             .set("to", issue.to.to_string())
             .set("memo", issue.memo.to_string())
-            .set("quantity", issue.quantity.to_string())
-            // extras
-            .set("amount", issue.amount.to_string())
-            .set("precision", issue.precision.to_string())
-            .set("value", issue.value.to_string());
+            .set("quantity", issue.quantity.to_string());
+        set_common_fields!(row, issue);
     }
 
     for retire in map_events.retires {
-        let key = to_key(&retire.trx_id, retire.action_index);
-        tables
-            .create_row("retires", key)
-            // transaction
-            .set("trx_id", retire.trx_id.to_string())
-            .set("action_index", retire.action_index.to_string())
-            // contract & scope
-            .set("contract", retire.contract.to_string())
-            .set("symcode", retire.symcode.to_string())
-            // data payload
+        let row = tables
+            .create_row("Retire", unique_key!(retire))
             .set("quantity", retire.quantity.to_string())
             .set("from", retire.from.to_string())
-            .set("memo", retire.memo.to_string())
-            // extras
-            .set("amount", retire.amount.to_string())
-            .set("precision", retire.precision.to_string())
-            .set("value", retire.value.to_string());
+            .set("memo", retire.memo.to_string());
+        set_common_fields!(row, retire);
     }
 
     for create in map_events.creates {
-        let key = to_key(&create.trx_id, create.action_index);
-        tables
-            .create_row("creates", key)
-            // transaction
-            .set("trx_id", create.trx_id.to_string())
-            .set("action_index", create.action_index.to_string())
-            // contract & scope
-            .set("contract", create.contract.to_string())
-            .set("symcode", create.symcode.to_string())
-            // data payload
+        let row = tables
+            .create_row("Create", unique_key!(create))
             .set("issuer", create.issuer.to_string())
-            .set("maximum_supply", create.maximum_supply.to_string())
-            // extras
-            .set("amount", create.amount.to_string())
-            .set("precision", create.precision.to_string())
-            .set("value", create.value.to_string());
+            .set("maximum_supply", create.maximum_supply.to_string());
+        set_common_fields!(row, create);
     }
 
     Ok(tables.to_entity_changes())
 }
 
 #[substreams::handlers::map]
-pub fn ch_out(
-    map_events: Events,
-) -> Result<DatabaseChanges, Error> {
+pub fn ch_out(map_events: Events) -> Result<DatabaseChanges, Error> {
     let mut tables = DatabaseChanges::default();
 
     for account in map_events.balance_changes {
@@ -152,15 +112,26 @@ pub fn ch_out(
         ]);
 
         tables
-            .push_change_composite("balance_change_events", keys, 0, table_change::Operation::Create)
+            .push_change_composite(
+                "balance_change_events",
+                keys,
+                0,
+                table_change::Operation::Create,
+            )
             .change("contract", ("", account.contract.to_string().as_str()))
             .change("symcode", ("", account.symcode.to_string().as_str()))
             .change("balance", ("", account.balance.to_string().as_str()))
-            .change("balance_delta", ("", account.balance_delta.to_string().as_str()))
+            .change(
+                "balance_delta",
+                ("", account.balance_delta.to_string().as_str()),
+            )
             .change("precision", ("", account.precision.to_string().as_str()))
             .change("amount", ("", account.amount.to_string().as_str()))
             .change("value", ("", account.value.to_string().as_str()))
-            .change("timestamp", ("", account.timestamp.unwrap().to_string().as_str()));
+            .change(
+                "timestamp",
+                ("", account.timestamp.unwrap().to_string().as_str()),
+            );
     }
 
     for stat in map_events.supply_changes {
@@ -172,7 +143,12 @@ pub fn ch_out(
         ]);
 
         tables
-            .push_change_composite("supply_change_events", keys, 0, table_change::Operation::Create)
+            .push_change_composite(
+                "supply_change_events",
+                keys,
+                0,
+                table_change::Operation::Create,
+            )
             .change("symcode", ("", stat.symcode.to_string().as_str()))
             .change("issuer", ("", stat.issuer.to_string().as_str()))
             .change("max_supply", ("", stat.max_supply.to_string().as_str()))
@@ -181,13 +157,19 @@ pub fn ch_out(
             .change("precision", ("", stat.precision.to_string().as_str()))
             .change("amount", ("", stat.amount.to_string().as_str()))
             .change("value", ("", stat.value.to_string().as_str()))
-            .change("timestamp", ("", stat.timestamp.unwrap().to_string().as_str()));
+            .change(
+                "timestamp",
+                ("", stat.timestamp.unwrap().to_string().as_str()),
+            );
     }
 
     for transfer in map_events.transfers {
         let keys = HashMap::from([
             ("trx_id".to_string(), transfer.trx_id),
-            ("action_index".to_string(), transfer.action_index.to_string()),
+            (
+                "action_index".to_string(),
+                transfer.action_index.to_string(),
+            ),
         ]);
 
         tables
@@ -202,7 +184,10 @@ pub fn ch_out(
             .change("precision", ("", transfer.precision.to_string().as_str()))
             .change("value", ("", transfer.value.to_string().as_str()))
             .change("block_num", ("", transfer.block_num.to_string().as_str()))
-            .change("timestamp", ("", transfer.timestamp.unwrap().to_string().as_str()));
+            .change(
+                "timestamp",
+                ("", transfer.timestamp.unwrap().to_string().as_str()),
+            );
     }
 
     for issue in map_events.issues {
@@ -223,7 +208,10 @@ pub fn ch_out(
             .change("precision", ("", issue.precision.to_string().as_str()))
             .change("value", ("", issue.value.to_string().as_str()))
             .change("block_num", ("", issue.block_num.to_string().as_str()))
-            .change("timestamp", ("", issue.timestamp.unwrap().to_string().as_str()));
+            .change(
+                "timestamp",
+                ("", issue.timestamp.unwrap().to_string().as_str()),
+            );
     }
 
     for retire in map_events.retires {
@@ -243,7 +231,10 @@ pub fn ch_out(
             .change("precision", ("", retire.precision.to_string().as_str()))
             .change("value", ("", retire.value.to_string().as_str()))
             .change("block_num", ("", retire.block_num.to_string().as_str()))
-            .change("timestamp", ("", retire.timestamp.unwrap().to_string().as_str()));
+            .change(
+                "timestamp",
+                ("", retire.timestamp.unwrap().to_string().as_str()),
+            );
     }
 
     for create in map_events.creates {
@@ -257,12 +248,18 @@ pub fn ch_out(
         tables
             .push_change_composite("create_events", keys, 0, table_change::Operation::Create)
             .change("issuer", ("", create.issuer.to_string().as_str()))
-            .change("maximum_supply", ("", create.maximum_supply.to_string().as_str()))
+            .change(
+                "maximum_supply",
+                ("", create.maximum_supply.to_string().as_str()),
+            )
             .change("precision", ("", create.precision.to_string().as_str()))
             .change("amount", ("", create.amount.to_string().as_str()))
             .change("value", ("", create.value.to_string().as_str()))
             .change("block_num", ("", create.block_num.to_string().as_str()))
-            .change("timestamp", ("", create.timestamp.unwrap().to_string().as_str()));
+            .change(
+                "timestamp",
+                ("", create.timestamp.unwrap().to_string().as_str()),
+            );
     }
 
     Ok(tables)
