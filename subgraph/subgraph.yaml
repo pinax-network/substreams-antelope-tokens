@@ -1,16 +1,15 @@
 specVersion: 1.0.0
-indexerHints:
-  prune: auto
 schema:
   file: ./schema.graphql
 dataSources:
   - kind: substreams
-    name: Contract
-    network: boba
+    name: antelope_tokens
+    network: eos
     source:
+      startBlock: 380000000
       package:
         moduleName: graph_out
-        file: /Users/shkvo/github/Pinax/substreams-antelope-tokens
+        file: ../antelope-tokens-v0.4.1.spkg
     mapping:
       apiVersion: 0.0.5
       kind: substreams/graph-entities
