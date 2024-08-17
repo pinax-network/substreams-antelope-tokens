@@ -819,9 +819,12 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+pnpm-lock.yaml
+package-lock.json
 yarn.lock
 adapters/**/*.csv
 adapters/**/*.jsonl
 
 # Sublime Text
 *.sublime*
+

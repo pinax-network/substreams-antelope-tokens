@@ -23,6 +23,7 @@ protobuf:
 
 modules:
   - name: map_events
+    # initialBlock: 380000000
     kind: map
     inputs:
       - source: sf.antelope.type.v1.Block
@@ -30,7 +31,7 @@ modules:
       type: proto:antelope.eosio.token.v1.Events
 
   - name: graph_out
-    initialBlock: 380000000
+    # initialBlock: 380000000
     kind: map
     inputs:
       - map: map_events

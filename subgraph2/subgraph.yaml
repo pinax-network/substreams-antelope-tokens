@@ -1,0 +1,17 @@
+specVersion: 1.0.0
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: substreams
+    name: antelope_tokens
+    network: eos
+    source:
+      startBlock: 380000000
+      package:
+        moduleName: map_events
+        file: ../antelope-tokens-v0.4.1.spkg
+    mapping:
+      apiVersion: 0.0.7
+      kind: substreams/graph-entities
+      file: ./src/mapping.ts
+      handler: handleEvents

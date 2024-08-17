@@ -1,0 +1,32 @@
+type Account @entity(immutable: true) {
+  id: ID!
+  name: String!
+
+  balances: [AccountBalances!]! @derivedFrom(field: "account")
+}
+
+
+type Token @entity {
+  id: ID!
+
+  contract: String!
+  symcode: String!
+  precision: Int!
+
+  issuer: String!
+  max_supply: String!
+  supply: String!
+  supply_value: BigDecimal!
+
+  holders: [AccountBalances!]! @derivedFrom(field: "token")
+}
+
+type AccountBalances @entity {
+  id: ID!
+
+  account: Account!
+  token: Token!
+
+  balance: String!
+  balance_value: BigDecimal!
+}
