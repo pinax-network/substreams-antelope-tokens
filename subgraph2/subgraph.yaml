@@ -6,10 +6,10 @@ dataSources:
     name: antelope_tokens
     network: eos
     source:
-      startBlock: 380000000
+      # startBlock: 380000000
       package:
         moduleName: map_events
-        file: ../antelope-tokens-v0.4.1.spkg
+        file: ../antelope-tokens-v0.4.0.spkg
     mapping:
       apiVersion: 0.0.7
       kind: substreams/graph-entities

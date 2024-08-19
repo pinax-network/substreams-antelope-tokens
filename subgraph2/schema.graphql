@@ -13,10 +13,13 @@ type Token @entity {
   symcode: String!
   precision: Int!
 
-  issuer: String!
-  max_supply: String!
-  supply: String!
-  supply_value: BigDecimal!
+  issuer: String
+  max_supply: String
+  supply: String
+  supply_value: BigDecimal
+
+  created_blocknum: BigInt
+  created_tx: String
 
   holders: [AccountBalances!]! @derivedFrom(field: "token")
 }
