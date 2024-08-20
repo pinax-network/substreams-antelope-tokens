@@ -1,99 +1,76 @@
-use std::collections::HashMap;
-use substreams::errors::Error;
+use std::{collections::HashMap, str::FromStr};
+use substreams::{
+    errors::Error,
+    pb::substreams::{store_delta::Operation, StoreDelta},
+    proto,
+    scalar::BigDecimal,
+    store::{DeltaProto, Deltas, StoreGet, StoreGetProto},
+};
+use substreams_antelope::types::Asset;
 use substreams_database_change::pb::database::{table_change, DatabaseChanges};
 use substreams_entity_change::pb::entity::EntityChanges;
 
-use crate::eosio_token::Events;
-
-macro_rules! set_common_fields {
-    ($row:expr, $item:expr) => {
-        let timestamp = match $item.timestamp {
-            Some(ts) => ts.to_string(),
-            None => "".to_string(),
-        };
-
-        $row.set("trx_id", $item.trx_id.to_string())
-            .set("timestamp", timestamp)
-            .set("block_num", $item.block_num.to_string())
-            .set("action_index", $item.action_index.to_string())
-            .set("contract", $item.contract.to_string())
-            .set("symcode", $item.symcode.to_string())
-            .set("block_num", $item.block_num.to_string())
-            .set("precision", $item.precision.to_string())
-            .set("amount", $item.amount.to_string())
-            .set("value", $item.value.to_string());
-    };
-}
-
-macro_rules! unique_key {
-    ($item:expr) => {
-        format!(
-            "{}-{}-{}",
-            stringify!($item),
-            $item.trx_id,
-            $item.action_index
-        )
-    };
-}
+use crate::{
+    eosio_token::Events,
+    keys::{account_balance_key, account_key, token_key},
+    pb::antelope::eosio::token::v1::{Account, Token},
+};
 
 #[substreams::handlers::map]
-pub fn graph_out(map_events: Events) -> Result<EntityChanges, Error> {
+pub fn graph_out(
+    store_tokens: StoreGetProto<Token>,
+    map_events: Events,
+) -> Result<EntityChanges, Error> {
     let mut tables = substreams_entity_change::tables::Tables::new();
 
-    for account in map_events.balance_changes {
-        let row = tables
-            .create_row("Account", unique_key!(account))
-            .set("account", account.account.to_string())
-            .set("balance", account.balance.to_string())
-            .set("balance_delta", account.balance_delta.to_string());
-        set_common_fields!(row, account);
+    for event in map_events.creates {
+        tables
+            .create_row("Token", token_key(&event.contract, &event.symcode))
+            .set("contract", event.contract.to_string())
+            .set("symcode", event.symcode.to_string())
+            .set("precision", event.precision)
+            .set("created_blocknum", event.block_num.to_string())
+            .set("created_tx", event.trx_id.to_string())
+            .set("issuer", event.issuer.to_string())
+            .set("max_supply", event.maximum_supply.to_string());
     }
 
-    for stat in map_events.supply_changes {
-        let row = tables
-            .create_row("Stat", unique_key!(stat))
-            .set("issuer", stat.issuer.to_string())
-            .set("max_supply", stat.max_supply.to_string())
-            .set("supply", stat.supply.to_string())
-            .set("supply_delta", stat.supply_delta.to_string());
-        set_common_fields!(row, stat);
+    for event in map_events.supply_changes {
+        if store_tokens
+            .get_last(token_key(&event.contract, &event.symcode))
+            .is_none()
+        {
+            continue; // token must be created first
+        }
+
+        let value = match BigDecimal::from_str(&event.value.to_string()) {
+            Ok(value) => value,
+            Err(_) => panic!("Failed to convert value to BigDecimal: {}", event.value),
+        };
+        tables
+            .update_row("Token", token_key(&event.contract, &event.symcode))
+            .set("supply", event.supply.to_string())
+            .set("supply_value", value);
     }
 
-    for transfer in map_events.transfers {
-        let row = tables
-            .create_row("Transfer", unique_key!(transfer))
-            .set("from", transfer.from.to_string())
-            .set("to", transfer.to.to_string())
-            .set("memo", transfer.memo.to_string())
-            .set("quantity", transfer.quantity.to_string());
-        set_common_fields!(row, transfer);
-    }
+    for event in map_events.balance_changes {
+        if store_tokens
+            .get_last(token_key(&event.contract, &event.symcode))
+            .is_none()
+        {
+            continue; // token must be created first
+        }
 
-    for issue in map_events.issues {
-        let row = tables
-            .create_row("Issue", unique_key!(issue))
-            .set("issuer", issue.issuer.to_string())
-            .set("to", issue.to.to_string())
-            .set("memo", issue.memo.to_string())
-            .set("quantity", issue.quantity.to_string());
-        set_common_fields!(row, issue);
-    }
+        tables
+            .update_row("Account", account_key(&event.account))
+            .set("name", event.account.to_string());
 
-    for retire in map_events.retires {
-        let row = tables
-            .create_row("Retire", unique_key!(retire))
-            .set("quantity", retire.quantity.to_string())
-            .set("from", retire.from.to_string())
-            .set("memo", retire.memo.to_string());
-        set_common_fields!(row, retire);
-    }
-
-    for create in map_events.creates {
-        let row = tables
-            .create_row("Create", unique_key!(create))
-            .set("issuer", create.issuer.to_string())
-            .set("maximum_supply", create.maximum_supply.to_string());
-        set_common_fields!(row, create);
+        tables
+            .update_row(
+                "AccountBalance",
+                account_balance_key(&event.contract, &event.symcode, &event.account),
+            )
+            .set("balance", event.balance.to_string());
     }
 
     Ok(tables.to_entity_changes())

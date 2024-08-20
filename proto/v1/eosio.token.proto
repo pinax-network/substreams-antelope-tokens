@@ -158,3 +158,22 @@ message SupplyChange {
   uint64 block_num = 13;
   google.protobuf.Timestamp timestamp = 14;
 }
+
+message Token {
+  string contract = 1;
+  string symcode = 2;
+  uint32 precision = 3;
+
+  string issuer = 5;
+  string max_supply = 6;
+
+  uint64 created_blocknum = 10;
+  string created_tx = 11;
+}
+
+message Account {
+  string name = 1;
+
+  uint64 created_blocknum = 10;
+  string created_tx = 11;
+}

@@ -40,7 +40,12 @@ function handleBalanceChanges(balanceChanges: BalanceChange[]): void {
             tokenEntity.contract = change.contract;
             tokenEntity.symcode = change.symcode;
             tokenEntity.precision = change.precision;
+            tokenEntity.holders_count = 1;
 
+            tokenEntity.save();
+        }
+        else{
+            tokenEntity.holders_count += 1;
             tokenEntity.save();
         }
 
@@ -69,6 +74,7 @@ function handleCreates(creates: Create[]): void {
             tokenEntity.max_supply = create.maximumSupply;
             tokenEntity.created_blocknum = BigInt.fromU64(create.blockNum);
             tokenEntity.created_tx = create.trxId;
+            tokenEntity.holders_count = 0;
             tokenEntity.save();
         }
     }

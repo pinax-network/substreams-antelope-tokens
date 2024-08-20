@@ -1,0 +1,22 @@
+{
+  "name": "antetokens3",
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "graph build",
+    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ antetokens3",
+    "create-local": "graph create --node http://localhost:8020/ antetokens3",
+    "remove-local": "graph remove --node http://localhost:8020/ antetokens3",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 antetokens3",
+    "test": "graph test"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "0.80.0",
+    "@graphprotocol/graph-ts": "^0.35.1",
+    "as-proto": "^1.3.0"
+  },
+  "devDependencies": {
+    "@types/google-protobuf": "^3.15.12",
+    "as-proto-gen": "^1.3.0"
+  },
+  "version": "v0.0.1"
+}

@@ -1,7 +1,7 @@
 specVersion: v0.1.0
 package:
   name: antelope_tokens
-  version: v0.4.1
+  version: v0.4.2
   url: https://github.com/pinax-network/substreams-antelope-tokens
   doc: Antelope `eosio.token` based action traces & database operations.
 
@@ -30,10 +30,18 @@ modules:
     output:
       type: proto:antelope.eosio.token.v1.Events
 
+  - name: store_tokens
+    kind: store
+    valueType: proto:antelope.eosio.token.v1.Token
+    updatePolicy: set
+    inputs:
+      - map: map_events
+
   - name: graph_out
     # initialBlock: 380000000
     kind: map
     inputs:
+      - store: store_tokens
       - map: map_events
     output:
       type: proto:sf.substreams.sink.entity.v1.EntityChanges
