@@ -2,6 +2,7 @@
   "name": "antetokens3",
   "license": "UNLICENSED",
   "scripts": {
+    "codegen": "graph codegen",
     "build": "graph build",
     "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ antetokens3",
     "create-local": "graph create --node http://localhost:8020/ antetokens3",

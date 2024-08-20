@@ -1,6 +1,7 @@
-type Account @entity(immutable: true) {
+type Account @entity{
   id: ID!
   name: String!
+  last_blocknum: BigInt
 
   balances: [AccountBalance!]! @derivedFrom(field: "account")
 }
@@ -11,7 +12,7 @@ type Token @entity {
 
   contract: String!
   symcode: String!
-  precision: Int!
+  precision: BigInt!
 
   issuer: String
   max_supply: String
@@ -22,7 +23,6 @@ type Token @entity {
   created_tx: String
 
   holders: [AccountBalance!]! @derivedFrom(field: "token")
-  holders_count: Int!
 }
 
 type AccountBalance @entity {

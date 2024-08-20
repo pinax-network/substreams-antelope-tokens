@@ -12,7 +12,7 @@ ingestor = "block_ingestor_node"
 protocol = "substreams"
 shard = "primary"
 provider = [
-    { label = "substreams-eos", details = { type = "substreams", url = "http://eos-sfsf69.mar.eosn.io:9000" } },
+    { label = "substreams-eos", details = { type = "substreams", url = "https://eos.substreams.pinax.network:443", key = "e6e366c5f113422442132defd2ce83807a780e510a1bb87e" } },
 ]
 
 [deployment]

@@ -1,19 +1,16 @@
 use std::{collections::HashMap, str::FromStr};
 use substreams::{
     errors::Error,
-    pb::substreams::{store_delta::Operation, StoreDelta},
-    proto,
     scalar::BigDecimal,
-    store::{DeltaProto, Deltas, StoreGet, StoreGetProto},
+    store::{StoreGet, StoreGetProto},
 };
-use substreams_antelope::types::Asset;
 use substreams_database_change::pb::database::{table_change, DatabaseChanges};
 use substreams_entity_change::pb::entity::EntityChanges;
 
 use crate::{
     eosio_token::Events,
     keys::{account_balance_key, account_key, token_key},
-    pb::antelope::eosio::token::v1::{Account, Token},
+    pb::antelope::eosio::token::v1::Token,
 };
 
 #[substreams::handlers::map]
@@ -26,13 +23,13 @@ pub fn graph_out(
     for event in map_events.creates {
         tables
             .create_row("Token", token_key(&event.contract, &event.symcode))
-            .set("contract", event.contract.to_string())
-            .set("symcode", event.symcode.to_string())
+            .set("contract", event.contract)
+            .set("symcode", event.symcode)
             .set("precision", event.precision)
-            .set("created_blocknum", event.block_num.to_string())
-            .set("created_tx", event.trx_id.to_string())
-            .set("issuer", event.issuer.to_string())
-            .set("max_supply", event.maximum_supply.to_string());
+            .set("created_blocknum", event.block_num)
+            .set("created_tx", event.trx_id)
+            .set("issuer", event.issuer)
+            .set("max_supply", event.maximum_supply);
     }
 
     for event in map_events.supply_changes {
@@ -43,34 +40,50 @@ pub fn graph_out(
             continue; // token must be created first
         }
 
-        let value = match BigDecimal::from_str(&event.value.to_string()) {
-            Ok(value) => value,
-            Err(_) => panic!("Failed to convert value to BigDecimal: {}", event.value),
-        };
+        let value = BigDecimal::from_str(&event.value.to_string()).expect(&format!(
+            "Failed to convert value to BigDecimal: {}",
+            event.value
+        ));
         tables
             .update_row("Token", token_key(&event.contract, &event.symcode))
-            .set("supply", event.supply.to_string())
+            .set("supply", event.supply)
             .set("supply_value", value);
     }
 
+    // squash all block transfer for each account, i.e. EIDOS
+    let mut balance_changes = HashMap::new();
     for event in map_events.balance_changes {
+        balance_changes.insert(
+            account_balance_key(&event.contract, &event.symcode, &event.account),
+            event,
+        );
+    }
+    for event in balance_changes.values() {
         if store_tokens
             .get_last(token_key(&event.contract, &event.symcode))
             .is_none()
         {
             continue; // token must be created first
         }
+        let value = BigDecimal::from_str(&event.value.to_string()).expect(&format!(
+            "Failed to convert value to BigDecimal: {}",
+            event.value
+        ));
 
         tables
             .update_row("Account", account_key(&event.account))
-            .set("name", event.account.to_string());
+            .set("name", &event.account)
+            .set("last_blocknum", event.block_num);
 
         tables
             .update_row(
                 "AccountBalance",
                 account_balance_key(&event.contract, &event.symcode, &event.account),
             )
-            .set("balance", event.balance.to_string());
+            .set("account", account_key(&event.account))
+            .set("token", token_key(&event.contract, &event.symcode))
+            .set("balance", &event.balance)
+            .set("balance_value", value);
     }
 
     Ok(tables.to_entity_changes())
