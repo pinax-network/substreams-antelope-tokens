@@ -72,8 +72,7 @@ pub fn graph_out(
 
         tables
             .update_row("Account", account_key(&event.account))
-            .set("name", &event.account)
-            .set("last_blocknum", event.block_num);
+            .set("name", &event.account);
 
         tables
             .update_row(

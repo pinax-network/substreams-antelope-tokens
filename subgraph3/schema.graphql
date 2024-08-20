@@ -1,7 +1,6 @@
 type Account @entity{
   id: ID!
   name: String!
-  last_blocknum: BigInt
 
   balances: [AccountBalance!]! @derivedFrom(field: "account")
 }
