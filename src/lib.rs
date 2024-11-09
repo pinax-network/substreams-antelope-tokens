@@ -4,6 +4,7 @@ pub mod eosio_token;
 pub use self::eosio_token::*;
 
 mod abi;
+mod balance_changes;
 mod maps;
 mod pb;
 mod sinks;

@@ -36,6 +36,8 @@ message Transfer {
   // block information
   uint64 block_num = 13;
   google.protobuf.Timestamp timestamp = 14;
+  string block_hash = 15;
+  string block_date = 16;
 }
 
 message Issue {
@@ -61,6 +63,8 @@ message Issue {
   // block information
   uint64 block_num = 12;
   google.protobuf.Timestamp timestamp = 13;
+  string block_hash = 14;
+  string block_date = 15;
 }
 
 message Retire {
@@ -85,6 +89,8 @@ message Retire {
   // block information
   uint64 block_num = 12;
   google.protobuf.Timestamp timestamp = 13;
+  string block_hash = 14;
+  string block_date = 15;
 }
 
 message Create {
@@ -108,6 +114,8 @@ message Create {
   // block information
   uint64 block_num = 11;
   google.protobuf.Timestamp timestamp = 12;
+  string block_hash = 13;
+  string block_date = 14;
 }
 
 message BalanceChange {
@@ -132,6 +140,8 @@ message BalanceChange {
   // block information
   uint64 block_num = 13;
   google.protobuf.Timestamp timestamp = 14;
+  string block_hash = 15;
+  string block_date = 16;
 }
 
 message SupplyChange {
@@ -157,4 +167,6 @@ message SupplyChange {
   // block information
   uint64 block_num = 13;
   google.protobuf.Timestamp timestamp = 14;
+  string block_hash = 15;
+  string block_date = 16;
 }
