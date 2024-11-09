@@ -1,10 +1,9 @@
-use crate::{abi, SupplyChange};
-use antelope::{Asset, Name, Symbol, SymbolCode};
+use crate::{utils::parse_json_name, SupplyChange};
+use antelope::{Asset, ExtendedSymbol, Name};
 use substreams::{log, pb::substreams::Clock};
-use substreams_antelope::decoder::decode;
 use substreams_antelope::Block;
 
-use crate::utils;
+use crate::utils::{self, parse_json_asset};
 
 pub fn collect_supply_changes(clock: &Clock, block: &Block) -> Vec<SupplyChange> {
     block
@@ -14,57 +13,52 @@ pub fn collect_supply_changes(clock: &Clock, block: &Block) -> Vec<SupplyChange>
                 if db_op.table_name != "stat" {
                     return None;
                 }
+                // token contract
+                let contract = Name::from(db_op.code.as_str());
 
-                let old_data = decode::<abi::types::CurrencyStats>(&db_op.old_data_json).ok();
-                let new_data = decode::<abi::types::CurrencyStats>(&db_op.new_data_json).ok();
+                // ignore invalid contract or account
+                if contract.value == 0 {
+                    log::info!("Invalid contract in trx {}: contract: {}", trx.id, contract,);
+                    return None;
+                }
 
-                let old_supply =
-                    old_data
-                        .as_ref()
-                        .and_then(|data| match data.supply.parse::<Asset>() {
-                            Ok(asset) => Some(asset),
-                            Err(e) => {
-                                log::info!(
-                                    "Error parsing old supply asset in trx {}: {:?}",
-                                    trx.id,
-                                    e
-                                );
-                                None
-                            }
-                        });
+                // parse Assets
+                let old_supply = parse_json_asset(&db_op.old_data_json, "supply");
+                let new_supply = parse_json_asset(&db_op.new_data_json, "supply");
+                let new_max_supply = parse_json_asset(&db_op.new_data_json, "max_supply");
+                let new_issuer = parse_json_name(&db_op.new_data_json, "issuer");
 
-                let new_supply =
-                    new_data
-                        .as_ref()
-                        .and_then(|data| match data.supply.parse::<Asset>() {
-                            Ok(asset) => Some(asset),
-                            Err(e) => {
-                                log::info!(
-                                    "Error parsing new supply asset in trx {}: {:?}",
-                                    trx.id,
-                                    e
-                                );
-                                None
-                            }
-                        });
-
+                // no valid Assets
                 if old_supply.is_none() && new_supply.is_none() {
                     return None;
                 }
 
-                let symcode = SymbolCode::from(Name::from(db_op.primary_key.as_str()).value);
-                let precision = new_supply
-                    .unwrap_or_else(|| old_supply.unwrap())
-                    .symbol
-                    .precision();
-                let sym = Symbol::from_precision(symcode, precision);
-                let supply = new_supply.unwrap_or_else(|| Asset::from_amount(0, sym));
-                let supply_delta = supply.amount
-                    - old_supply
-                        .unwrap_or_else(|| Asset::from_amount(0, sym))
-                        .amount;
+                // ignore mismatched supply
+                if old_supply.is_some() && new_supply.is_some() {
+                    if old_supply.unwrap().symbol != new_supply.unwrap().symbol {
+                        log::info!(
+                            "Mismatched supply in trx {}: old_supply: {:?}, new_supply: {:?}",
+                            trx.id,
+                            old_supply,
+                            new_supply
+                        );
+                        return None;
+                    }
+                }
 
-                let data = new_data.unwrap_or_else(|| old_data.unwrap());
+                // fields derived from old_balance or new_balance
+                let sym = old_supply
+                    .or(new_supply)
+                    .as_ref()
+                    .expect("missing old_supply or new_supply")
+                    .symbol;
+                let token = ExtendedSymbol::from_extended(sym, contract);
+                let zero = Asset::from_amount(0, sym);
+                let old_supply = old_supply.as_ref().unwrap_or(&zero);
+                let supply = new_supply.as_ref().unwrap_or(&zero);
+                let supply_delta = supply.amount - old_supply.amount;
+                let max_supply = new_max_supply.as_ref().unwrap_or(&zero);
+                let issuer = new_issuer.unwrap_or(Name::new());
 
                 Some(SupplyChange {
                     // trace information
@@ -72,24 +66,29 @@ pub fn collect_supply_changes(clock: &Clock, block: &Block) -> Vec<SupplyChange>
                     action_index: db_op.action_index,
 
                     // contract & scope
-                    contract: db_op.code.clone(),
-                    symcode: symcode.to_string(),
+                    contract: contract.to_string(),
+                    symcode: sym.code().to_string(),
 
                     // payload
-                    issuer: data.issuer,
-                    max_supply: data.max_supply,
+                    issuer: issuer.to_string(),
+                    max_supply: max_supply.to_string(),
                     supply: supply.to_string(),
                     supply_delta,
 
                     // extras
-                    precision: precision.into(),
+                    precision: sym.precision().into(),
                     amount: supply.amount,
                     value: utils::to_value(&supply),
 
+                    // block
                     block_num: clock.number,
                     timestamp: clock.timestamp,
                     block_hash: clock.id.clone(),
                     block_date: utils::to_date(&clock),
+
+                    // token (ex: "4,EOS@eosio.token")
+                    token: token.to_string(),
+                    operation: db_op.operation().as_str_name().to_string(),
                 })
             })
         })

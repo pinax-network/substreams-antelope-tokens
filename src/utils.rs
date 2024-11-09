@@ -1,4 +1,4 @@
-use antelope::Asset;
+use antelope::{Asset, Name};
 use substreams::pb::substreams::Clock;
 
 pub fn to_value(quantity: &Asset) -> f64 {
@@ -22,6 +22,32 @@ pub fn to_date(clock: &Clock) -> String {
         .to_string()
 }
 
-// pub fn to_key(trx_id: &str, action_index: u32) -> String {
-//     format!("{}-{}", trx_id, action_index)
-// }
+pub fn parse_json_asset(data_json: &str, key: &str) -> Option<Asset> {
+    let v = serde_json::from_str::<serde_json::Value>(data_json);
+    match v {
+        Ok(data) => {
+            let value_str = data[key].as_str().unwrap_or("");
+            let value = value_str.parse::<Asset>();
+            match value {
+                Ok(asset) => Some(asset),
+                Err(_e) => None,
+            }
+        }
+        Err(_e) => None,
+    }
+}
+
+pub fn parse_json_name(data_json: &str, key: &str) -> Option<Name> {
+    let v = serde_json::from_str::<serde_json::Value>(data_json);
+    match v {
+        Ok(data) => {
+            let value_str = data[key].as_str().unwrap_or("");
+            let value = value_str.parse::<Name>();
+            match value {
+                Ok(name) => Some(name),
+                Err(_e) => None,
+            }
+        }
+        Err(_e) => None,
+    }
+}

@@ -202,6 +202,14 @@ pub struct BalanceChange {
     pub block_hash: ::prost::alloc::string::String,
     #[prost(string, tag="16")]
     pub block_date: ::prost::alloc::string::String,
+    /// token
+    ///
+    /// ExtendedSymbol
+    #[prost(string, tag="17")]
+    pub token: ::prost::alloc::string::String,
+    /// db_op::Operation
+    #[prost(string, tag="18")]
+    pub operation: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -241,5 +249,13 @@ pub struct SupplyChange {
     pub block_hash: ::prost::alloc::string::String,
     #[prost(string, tag="16")]
     pub block_date: ::prost::alloc::string::String,
+    /// token
+    ///
+    /// ExtendedSymbol
+    #[prost(string, tag="17")]
+    pub token: ::prost::alloc::string::String,
+    /// db_op::Operation
+    #[prost(string, tag="18")]
+    pub operation: ::prost::alloc::string::String,
 }
 // @@protoc_insertion_point(module)

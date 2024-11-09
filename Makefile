@@ -25,10 +25,14 @@ graph:
 info:
 	substreams info
 
-.PHONY: run
-run:
-	substreams run -e eos.substreams.pinax.network:443 graph_out -s -10000
-
 .PHONY: gui
 gui:
-	substreams gui -e eos.substreams.pinax.network:443 graph_out -s -10000
+	substreams gui substreams.yaml -e eos.substreams.pinax.network:443 map_events -s -1000 -t 0
+
+.PHONY: parquet
+parquet:
+	substreams-sink-files run eos.substreams.pinax.network:443 substreams.yaml map_events '.' 2: --encoder parquet
+
+.PHONY: schema
+schema:
+	substreams-sink-files tools parquet schema substreams.yaml map_events

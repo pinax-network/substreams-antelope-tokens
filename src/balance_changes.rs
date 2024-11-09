@@ -1,10 +1,9 @@
-use crate::{abi, BalanceChange};
-use antelope::{Asset, Name, Symbol, SymbolCode};
+use crate::BalanceChange;
+use antelope::{Asset, ExtendedSymbol, Name};
 use substreams::{log, pb::substreams::Clock};
-use substreams_antelope::decoder::decode;
 use substreams_antelope::Block;
 
-use crate::utils;
+use crate::utils::{self, parse_json_asset};
 
 pub fn collect_balance_changes(clock: &Clock, block: &Block) -> Vec<BalanceChange> {
     block
@@ -15,54 +14,54 @@ pub fn collect_balance_changes(clock: &Clock, block: &Block) -> Vec<BalanceChang
                     return None;
                 }
 
-                let old_data = decode::<abi::types::Account>(&db_op.old_data_json).ok();
-                let new_data = decode::<abi::types::Account>(&db_op.new_data_json).ok();
+                // decoded
+                let old_balance = parse_json_asset(&db_op.old_data_json, "balance");
+                let new_balance = parse_json_asset(&db_op.new_data_json, "balance");
 
-                let old_balance =
-                    old_data
-                        .as_ref()
-                        .and_then(|data| match data.balance.parse::<Asset>() {
-                            Ok(asset) => Some(asset),
-                            Err(e) => {
-                                log::info!(
-                                    "Error parsing old balance asset in trx {}: {:?}",
-                                    trx.id,
-                                    e
-                                );
-                                None
-                            }
-                        });
-                let new_balance =
-                    new_data
-                        .as_ref()
-                        .and_then(|data| match data.balance.parse::<Asset>() {
-                            Ok(asset) => Some(asset),
-                            Err(e) => {
-                                log::info!(
-                                    "Error parsing new balance asset in trx {}: {:?}",
-                                    trx.id,
-                                    e
-                                );
-                                None
-                            }
-                        });
-
+                // no valid Accounts
                 if old_balance.is_none() && new_balance.is_none() {
                     return None;
                 }
 
-                let raw_primary_key = Name::from(db_op.primary_key.as_str()).value;
-                let symcode = SymbolCode::from(raw_primary_key);
-                let precision = new_balance
-                    .unwrap_or_else(|| old_balance.unwrap())
-                    .symbol
-                    .precision();
-                let sym = Symbol::from_precision(symcode, precision);
-                let balance = new_balance.unwrap_or_else(|| Asset::from_amount(0, sym));
-                let balance_delta = balance.amount
-                    - old_balance
-                        .unwrap_or_else(|| Asset::from_amount(0, sym))
-                        .amount;
+                // token contract & account
+                let contract = Name::from(db_op.code.as_str());
+                let account = Name::from(db_op.scope.as_str());
+
+                // ignore invalid contract or account
+                if contract.value == 0 || account.value == 0 {
+                    log::info!(
+                        "Invalid contract or account in trx {}: contract: {}, account: {}",
+                        trx.id,
+                        contract,
+                        account
+                    );
+                    return None;
+                }
+
+                // ignore mismatched balances
+                if old_balance.is_some() && new_balance.is_some() {
+                    if old_balance.unwrap().symbol != new_balance.unwrap().symbol {
+                        log::info!(
+                            "Mismatched balance in trx {}: old_balance: {:?}, new_balance: {:?}",
+                            trx.id,
+                            old_balance,
+                            new_balance
+                        );
+                        return None;
+                    }
+                }
+
+                // fields derived from old_balance or new_balance
+                let sym = old_balance
+                    .or(new_balance)
+                    .as_ref()
+                    .expect("missing old_balance or new_balance")
+                    .symbol;
+                let token = ExtendedSymbol::from_extended(sym, contract);
+                let zero = Asset::from_amount(0, sym);
+                let balance = new_balance.as_ref().unwrap_or(&zero);
+                let old_balance = old_balance.as_ref().unwrap_or(&zero);
+                let balance_delta = balance.amount - old_balance.amount;
 
                 Some(BalanceChange {
                     // trace information
@@ -70,23 +69,28 @@ pub fn collect_balance_changes(clock: &Clock, block: &Block) -> Vec<BalanceChang
                     action_index: db_op.action_index,
 
                     // contract & scope
-                    contract: db_op.code.clone(),
-                    symcode: symcode.to_string(),
+                    contract: contract.to_string(),
+                    symcode: sym.code().to_string(),
 
                     // payload
-                    account: db_op.scope.clone(),
+                    account: account.to_string(),
                     balance: balance.to_string(),
                     balance_delta,
 
                     // extras
-                    precision: precision.into(),
+                    precision: sym.precision().into(),
                     amount: balance.amount,
                     value: utils::to_value(&balance),
 
+                    // block
                     block_num: clock.number,
                     timestamp: clock.timestamp,
                     block_hash: clock.id.clone(),
                     block_date: utils::to_date(&clock),
+
+                    // token (ex: "4,EOS@eosio.token")
+                    token: token.to_string(),
+                    operation: db_op.operation().as_str_name().to_string(),
                 })
             })
         })
