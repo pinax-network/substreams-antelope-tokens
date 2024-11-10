@@ -31,7 +31,7 @@ gui:
 
 .PHONY: parquet
 parquet:
-	substreams-sink-files run eos.substreams.pinax.network:443 substreams.yaml map_events '.' 2: --encoder parquet
+	substreams-sink-files run eos.substreams.pinax.network:443 substreams.yaml map_events s3://pinax/eos/48034848cd64dcd70f95e06de9ed5d1478d0133e?region=us-east-1 2: --encoder parquet
 
 .PHONY: schema
 schema:
