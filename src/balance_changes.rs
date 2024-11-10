@@ -67,8 +67,8 @@ pub fn collect_balance_changes(clock: &Clock, block: &Block) -> Vec<BalanceChang
 
                 Some(BalanceChange {
                     // block
-                    block_num: clock.number,
                     timestamp: clock.timestamp,
+                    block_num: clock.number,
                     block_hash: clock.id.clone(),
                     block_date: to_date(&clock),
 

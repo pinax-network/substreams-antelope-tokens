@@ -1,7 +1,7 @@
 specVersion: v0.1.0
 package:
   name: antelope_tokens
-  version: v0.5.0
+  version: v1.0.0
   url: https://github.com/pinax-network/substreams-antelope-tokens
 
 imports:
@@ -19,6 +19,9 @@ protobuf:
     - eosio.token.proto
   importPaths:
     - ./proto/v1
+  excludePaths:
+    - sf/substreams
+    - google
 
 modules:
   - name: map_events
@@ -28,28 +31,3 @@ modules:
       - source: sf.antelope.type.v1.Block
     output:
       type: proto:antelope.eosio.token.v1.Events
-
-  - name: graph_out
-    kind: map
-    inputs:
-      - map: map_events
-    output:
-      type: proto:sf.substreams.sink.entity.v1.EntityChanges
-
-  - name: ch_out
-    kind: map
-    inputs:
-      - map: map_events
-    output:
-      type: proto:sf.substreams.sink.database.v1.DatabaseChanges
-
-sink:
-  module: ch_out
-  type: sf.substreams.sink.sql.v1.Service
-  config:
-    schema: "./schema.sql"
-    engine: clickhouse
-    postgraphile_frontend:
-      enabled: false
-    pgweb_frontend:
-      enabled: false

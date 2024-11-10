@@ -7,12 +7,11 @@
 ### Quickstart
 
 ```bash
-$ make
-$ make gui
+make
+make gui
 ```
 
 ### Mermaid graph
-
 
 ```mermaid
 graph TD;

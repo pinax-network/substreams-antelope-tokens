@@ -1,6 +1,6 @@
 [package]
-name = "antelope_tokens"
-version = "0.0.0"
+name = "substreams-antelope-tokens"
+version = "1.0.0"
 authors = [
     "Denis <denis@pinax.network>",
     "Yaro <yaro@pinax.network>",
@@ -8,19 +8,12 @@ authors = [
     "Ali <ali@pinax.network>",
     "Etienne <etienne@pinax.network>",
 ]
-description = "Antelope tokens substreams"
-license = "MIT OR Apache-2.0"
+description = "Substreams for Antelope tokens"
+license = "MIT"
 edition = "2021"
-publish = false
-
-[badges]
-maintenance = { status = "actively-developed" }
 
 [lib]
-crate-type = ["cdylib"]
-
-[build-dependencies]
-substreams-antelope = "0.6"
+crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 serde_json = "1"
@@ -29,7 +22,7 @@ prost = "0.13"
 prost-types = "0.13"
 substreams = "0.6"
 substreams-antelope = "0.6"
-substreams-sink-kv = "0.1.2"
-substreams-database-change = "2.0.0"
-substreams-entity-change = "2.0.0"
 antelope = "0.2"
+
+[build-dependencies]
+substreams-antelope = "0.6"

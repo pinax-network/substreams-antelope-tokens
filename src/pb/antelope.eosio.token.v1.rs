@@ -20,10 +20,10 @@ pub struct Events {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Transfer {
     /// block information
-    #[prost(uint64, tag="1")]
-    pub block_num: u64,
-    #[prost(message, optional, tag="2")]
+    #[prost(message, optional, tag="1")]
     pub timestamp: ::core::option::Option<::prost_types::Timestamp>,
+    #[prost(uint64, tag="2")]
+    pub block_num: u64,
     #[prost(string, tag="3")]
     pub block_hash: ::prost::alloc::string::String,
     #[prost(string, tag="4")]
@@ -31,11 +31,11 @@ pub struct Transfer {
     /// trace information
     #[prost(string, tag="5")]
     pub trx_id: ::prost::alloc::string::String,
-    #[prost(uint32, tag="6")]
-    pub action_ordinal: u32,
     /// Action execution_index
-    #[prost(uint32, tag="7")]
+    #[prost(uint32, tag="6")]
     pub index: u32,
+    #[prost(uint32, tag="7")]
+    pub action_ordinal: u32,
     /// Vec<PermissionLevel> (ex: \["account@active"\])
     #[prost(string, repeated, tag="8")]
     pub authorization: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
@@ -71,10 +71,10 @@ pub struct Transfer {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Issue {
     /// block information
-    #[prost(uint64, tag="1")]
-    pub block_num: u64,
-    #[prost(message, optional, tag="2")]
+    #[prost(message, optional, tag="1")]
     pub timestamp: ::core::option::Option<::prost_types::Timestamp>,
+    #[prost(uint64, tag="2")]
+    pub block_num: u64,
     #[prost(string, tag="3")]
     pub block_hash: ::prost::alloc::string::String,
     #[prost(string, tag="4")]
@@ -82,11 +82,11 @@ pub struct Issue {
     /// trace information
     #[prost(string, tag="5")]
     pub trx_id: ::prost::alloc::string::String,
-    #[prost(uint32, tag="6")]
-    pub action_ordinal: u32,
     /// Action execution_index
-    #[prost(uint32, tag="7")]
+    #[prost(uint32, tag="6")]
     pub index: u32,
+    #[prost(uint32, tag="7")]
+    pub action_ordinal: u32,
     /// Vec<PermissionLevel> (ex: \["account@active"\])
     #[prost(string, repeated, tag="8")]
     pub authorization: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
@@ -120,10 +120,10 @@ pub struct Issue {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Retire {
     /// block information
-    #[prost(uint64, tag="1")]
-    pub block_num: u64,
-    #[prost(message, optional, tag="2")]
+    #[prost(message, optional, tag="1")]
     pub timestamp: ::core::option::Option<::prost_types::Timestamp>,
+    #[prost(uint64, tag="2")]
+    pub block_num: u64,
     #[prost(string, tag="3")]
     pub block_hash: ::prost::alloc::string::String,
     #[prost(string, tag="4")]
@@ -131,11 +131,11 @@ pub struct Retire {
     /// trace information
     #[prost(string, tag="5")]
     pub trx_id: ::prost::alloc::string::String,
-    #[prost(uint32, tag="6")]
-    pub action_ordinal: u32,
     /// Action execution_index
-    #[prost(uint32, tag="7")]
+    #[prost(uint32, tag="6")]
     pub index: u32,
+    #[prost(uint32, tag="7")]
+    pub action_ordinal: u32,
     /// Vec<PermissionLevel> (ex: \["account@active"\])
     #[prost(string, repeated, tag="8")]
     pub authorization: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
@@ -167,10 +167,10 @@ pub struct Retire {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Create {
     /// block information
-    #[prost(uint64, tag="1")]
-    pub block_num: u64,
-    #[prost(message, optional, tag="2")]
+    #[prost(message, optional, tag="1")]
     pub timestamp: ::core::option::Option<::prost_types::Timestamp>,
+    #[prost(uint64, tag="2")]
+    pub block_num: u64,
     #[prost(string, tag="3")]
     pub block_hash: ::prost::alloc::string::String,
     #[prost(string, tag="4")]
@@ -178,11 +178,11 @@ pub struct Create {
     /// trace information
     #[prost(string, tag="5")]
     pub trx_id: ::prost::alloc::string::String,
-    #[prost(uint32, tag="6")]
-    pub action_ordinal: u32,
     /// Action execution_index
-    #[prost(uint32, tag="7")]
+    #[prost(uint32, tag="6")]
     pub index: u32,
+    #[prost(uint32, tag="7")]
+    pub action_ordinal: u32,
     /// Vec<PermissionLevel> (ex: \["account@active"\])
     #[prost(string, repeated, tag="8")]
     pub authorization: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
@@ -214,10 +214,10 @@ pub struct Create {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct BalanceChange {
     /// block information
-    #[prost(uint64, tag="1")]
-    pub block_num: u64,
-    #[prost(message, optional, tag="2")]
+    #[prost(message, optional, tag="1")]
     pub timestamp: ::core::option::Option<::prost_types::Timestamp>,
+    #[prost(uint64, tag="2")]
+    pub block_num: u64,
     #[prost(string, tag="3")]
     pub block_hash: ::prost::alloc::string::String,
     #[prost(string, tag="4")]
@@ -266,10 +266,10 @@ pub struct BalanceChange {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct SupplyChange {
     /// block information
-    #[prost(uint64, tag="1")]
-    pub block_num: u64,
-    #[prost(message, optional, tag="2")]
+    #[prost(message, optional, tag="1")]
     pub timestamp: ::core::option::Option<::prost_types::Timestamp>,
+    #[prost(uint64, tag="2")]
+    pub block_num: u64,
     #[prost(string, tag="3")]
     pub block_hash: ::prost::alloc::string::String,
     #[prost(string, tag="4")]

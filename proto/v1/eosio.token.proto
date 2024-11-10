@@ -15,15 +15,15 @@ message Events {
 
 message Transfer {
   // block information
-  uint64 block_num = 1;
-  google.protobuf.Timestamp timestamp = 2;
+  google.protobuf.Timestamp timestamp = 1;
+  uint64 block_num = 2;
   string block_hash = 3;
   string block_date = 4;
 
   // trace information
   string trx_id = 5;
-  uint32 action_ordinal = 6;
-  uint32 index = 7; // Action execution_index
+  uint32 index = 6; // Action execution_index
+  uint32 action_ordinal = 7;
   repeated string authorization = 8; // Vec<PermissionLevel> (ex: ["account@active"])
 
   // contract & scope
@@ -45,15 +45,15 @@ message Transfer {
 
 message Issue {
   // block information
-  uint64 block_num = 1;
-  google.protobuf.Timestamp timestamp = 2;
+  google.protobuf.Timestamp timestamp = 1;
+  uint64 block_num = 2;
   string block_hash = 3;
   string block_date = 4;
 
   // trace information
   string trx_id = 5;
-  uint32 action_ordinal = 6;
-  uint32 index = 7; // Action execution_index
+  uint32 index = 6; // Action execution_index
+  uint32 action_ordinal = 7;
   repeated string authorization = 8; // Vec<PermissionLevel> (ex: ["account@active"])
 
   // contract & scope
@@ -74,15 +74,15 @@ message Issue {
 
 message Retire {
   // block information
-  uint64 block_num = 1;
-  google.protobuf.Timestamp timestamp = 2;
+  google.protobuf.Timestamp timestamp = 1;
+  uint64 block_num = 2;
   string block_hash = 3;
   string block_date = 4;
 
   // trace information
   string trx_id = 5;
-  uint32 action_ordinal = 6;
-  uint32 index = 7; // Action execution_index
+  uint32 index = 6; // Action execution_index
+  uint32 action_ordinal = 7;
   repeated string authorization = 8; // Vec<PermissionLevel> (ex: ["account@active"])
 
   // contract & scope
@@ -102,15 +102,15 @@ message Retire {
 
 message Create {
   // block information
-  uint64 block_num = 1;
-  google.protobuf.Timestamp timestamp = 2;
+  google.protobuf.Timestamp timestamp = 1;
+  uint64 block_num = 2;
   string block_hash = 3;
   string block_date = 4;
 
   // trace information
   string trx_id = 5;
-  uint32 action_ordinal = 6;
-  uint32 index = 7; // Action execution_index
+  uint32 index = 6; // Action execution_index
+  uint32 action_ordinal = 7;
   repeated string authorization = 8; // Vec<PermissionLevel> (ex: ["account@active"])
 
   // contract & scope
@@ -130,8 +130,8 @@ message Create {
 
 message BalanceChange {
   // block information
-  uint64 block_num = 1;
-  google.protobuf.Timestamp timestamp = 2;
+  google.protobuf.Timestamp timestamp = 1;
+  uint64 block_num = 2;
   string block_hash = 3;
   string block_date = 4;
 
@@ -161,8 +161,8 @@ message BalanceChange {
 
 message SupplyChange {
   // block information
-  uint64 block_num = 1;
-  google.protobuf.Timestamp timestamp = 2;
+  google.protobuf.Timestamp timestamp = 1;
+  uint64 block_num = 2;
   string block_hash = 3;
   string block_date = 4;
 

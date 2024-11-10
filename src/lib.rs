@@ -3,10 +3,13 @@
 pub mod eosio_token;
 pub use self::eosio_token::*;
 
-mod abi;
-mod balance_changes;
-mod maps;
-mod pb;
-mod sinks;
-mod supply_changes;
-mod utils;
+pub mod abi;
+pub mod balance_changes;
+pub mod creates;
+pub mod issues;
+pub mod maps;
+pub mod pb;
+pub mod retires;
+pub mod supply_changes;
+pub mod transfers;
+pub mod utils;

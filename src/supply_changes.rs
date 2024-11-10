@@ -74,8 +74,8 @@ pub fn collect_supply_changes(clock: &Clock, block: &Block) -> Vec<SupplyChange>
 
                 Some(SupplyChange {
                     // block
-                    block_num: clock.number,
                     timestamp: clock.timestamp,
+                    block_num: clock.number,
                     block_hash: clock.id.clone(),
                     block_date: to_date(&clock),
 
