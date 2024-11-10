@@ -1,4 +1,7 @@
-use crate::{utils::parse_json_name, SupplyChange};
+use crate::{
+    utils::{parse_json_name, to_date},
+    SupplyChange,
+};
 use antelope::{Asset, ExtendedSymbol, Name};
 use substreams::{log, pb::substreams::Clock};
 use substreams_antelope::Block;
@@ -6,6 +9,7 @@ use substreams_antelope::Block;
 use crate::utils::{self, parse_json_asset};
 
 pub fn collect_supply_changes(clock: &Clock, block: &Block) -> Vec<SupplyChange> {
+    let mut index = 0; // incremental index for each supply change
     block
         .transaction_traces()
         .flat_map(|trx| {
@@ -25,6 +29,7 @@ pub fn collect_supply_changes(clock: &Clock, block: &Block) -> Vec<SupplyChange>
                 // parse Assets
                 let old_supply = parse_json_asset(&db_op.old_data_json, "supply");
                 let new_supply = parse_json_asset(&db_op.new_data_json, "supply");
+                let old_max_supply = parse_json_asset(&db_op.old_data_json, "max_supply");
                 let new_max_supply = parse_json_asset(&db_op.new_data_json, "max_supply");
                 let new_issuer = parse_json_name(&db_op.new_data_json, "issuer");
 
@@ -54,41 +59,48 @@ pub fn collect_supply_changes(clock: &Clock, block: &Block) -> Vec<SupplyChange>
                     .symbol;
                 let token = ExtendedSymbol::from_extended(sym, contract);
                 let zero = Asset::from_amount(0, sym);
+                let issuer = new_issuer.unwrap_or(Name::new());
+
+                // supply
                 let old_supply = old_supply.as_ref().unwrap_or(&zero);
                 let supply = new_supply.as_ref().unwrap_or(&zero);
                 let supply_delta = supply.amount - old_supply.amount;
+
+                // max supply
+                let old_max_supply = old_max_supply.as_ref().unwrap_or(&zero);
                 let max_supply = new_max_supply.as_ref().unwrap_or(&zero);
-                let issuer = new_issuer.unwrap_or(Name::new());
+                let max_supply_delta = max_supply.amount - old_max_supply.amount;
+                index += 1;
 
                 Some(SupplyChange {
-                    // trace information
+                    // block
+                    block_num: clock.number,
+                    timestamp: clock.timestamp,
+                    block_hash: clock.id.clone(),
+                    block_date: to_date(&clock),
+
+                    // transaction
                     trx_id: trx.id.clone(),
                     action_index: db_op.action_index,
+                    operation: db_op.operation().as_str_name().to_string(),
+                    index,
 
-                    // contract & scope
+                    // code & scope
                     contract: contract.to_string(),
-                    symcode: sym.code().to_string(),
+                    symcode: supply.symbol.code().to_string(),
+                    token: token.to_string(),
 
-                    // payload
+                    // data
                     issuer: issuer.to_string(),
-                    max_supply: max_supply.to_string(),
                     supply: supply.to_string(),
                     supply_delta,
+                    max_supply: max_supply.to_string(),
+                    max_supply_delta,
 
                     // extras
                     precision: sym.precision().into(),
                     amount: supply.amount,
                     value: utils::to_value(&supply),
-
-                    // block
-                    block_num: clock.number,
-                    timestamp: clock.timestamp,
-                    block_hash: clock.id.clone(),
-                    block_date: utils::to_date(&clock),
-
-                    // token (ex: "4,EOS@eosio.token")
-                    token: token.to_string(),
-                    operation: db_op.operation().as_str_name().to_string(),
                 })
             })
         })

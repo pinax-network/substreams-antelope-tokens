@@ -19,243 +19,303 @@ pub struct Events {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Transfer {
-    /// trace information
-    #[prost(string, tag="1")]
-    pub trx_id: ::prost::alloc::string::String,
-    #[prost(uint32, tag="2")]
-    pub action_index: u32,
-    /// contract & scope
+    /// block information
+    #[prost(uint64, tag="1")]
+    pub block_num: u64,
+    #[prost(message, optional, tag="2")]
+    pub timestamp: ::core::option::Option<::prost_types::Timestamp>,
     #[prost(string, tag="3")]
-    pub contract: ::prost::alloc::string::String,
+    pub block_hash: ::prost::alloc::string::String,
+    #[prost(string, tag="4")]
+    pub block_date: ::prost::alloc::string::String,
+    /// trace information
     #[prost(string, tag="5")]
+    pub trx_id: ::prost::alloc::string::String,
+    #[prost(uint32, tag="6")]
+    pub action_ordinal: u32,
+    /// Action execution_index
+    #[prost(uint32, tag="7")]
+    pub index: u32,
+    /// Vec<PermissionLevel> (ex: \["account@active"\])
+    #[prost(string, repeated, tag="8")]
+    pub authorization: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    /// contract & scope
+    ///
+    /// Name (ex: "eosio.token")
+    #[prost(string, tag="10")]
+    pub contract: ::prost::alloc::string::String,
+    /// SymbolCode (ex: "EOS")
+    #[prost(string, tag="11")]
     pub symcode: ::prost::alloc::string::String,
+    /// ExtendedSymbol (ex: "4,EOS@eosio.token")
+    #[prost(string, tag="12")]
+    pub token: ::prost::alloc::string::String,
     /// data payload
-    #[prost(string, tag="6")]
+    #[prost(string, tag="13")]
     pub from: ::prost::alloc::string::String,
-    #[prost(string, tag="7")]
+    #[prost(string, tag="14")]
     pub to: ::prost::alloc::string::String,
-    #[prost(string, tag="8")]
+    #[prost(string, tag="15")]
     pub quantity: ::prost::alloc::string::String,
-    #[prost(string, tag="9")]
+    #[prost(string, tag="16")]
     pub memo: ::prost::alloc::string::String,
     /// extras
-    #[prost(uint32, tag="10")]
+    #[prost(uint32, tag="17")]
     pub precision: u32,
-    #[prost(int64, tag="11")]
+    #[prost(int64, tag="18")]
     pub amount: i64,
-    #[prost(double, tag="12")]
+    #[prost(double, tag="19")]
     pub value: f64,
-    /// block information
-    #[prost(uint64, tag="13")]
-    pub block_num: u64,
-    #[prost(message, optional, tag="14")]
-    pub timestamp: ::core::option::Option<::prost_types::Timestamp>,
-    #[prost(string, tag="15")]
-    pub block_hash: ::prost::alloc::string::String,
-    #[prost(string, tag="16")]
-    pub block_date: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Issue {
-    /// trace information
-    #[prost(string, tag="1")]
-    pub trx_id: ::prost::alloc::string::String,
-    #[prost(uint32, tag="2")]
-    pub action_index: u32,
-    /// contract & scope
+    /// block information
+    #[prost(uint64, tag="1")]
+    pub block_num: u64,
+    #[prost(message, optional, tag="2")]
+    pub timestamp: ::core::option::Option<::prost_types::Timestamp>,
     #[prost(string, tag="3")]
-    pub contract: ::prost::alloc::string::String,
+    pub block_hash: ::prost::alloc::string::String,
     #[prost(string, tag="4")]
-    pub symcode: ::prost::alloc::string::String,
-    /// data payload
+    pub block_date: ::prost::alloc::string::String,
+    /// trace information
     #[prost(string, tag="5")]
-    pub issuer: ::prost::alloc::string::String,
-    #[prost(string, tag="6")]
+    pub trx_id: ::prost::alloc::string::String,
+    #[prost(uint32, tag="6")]
+    pub action_ordinal: u32,
+    /// Action execution_index
+    #[prost(uint32, tag="7")]
+    pub index: u32,
+    /// Vec<PermissionLevel> (ex: \["account@active"\])
+    #[prost(string, repeated, tag="8")]
+    pub authorization: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    /// contract & scope
+    ///
+    /// Name (ex: "eosio.token")
+    #[prost(string, tag="10")]
+    pub contract: ::prost::alloc::string::String,
+    /// SymbolCode (ex: "EOS")
+    #[prost(string, tag="11")]
+    pub symcode: ::prost::alloc::string::String,
+    /// ExtendedSymbol (ex: "4,EOS@eosio.token")
+    #[prost(string, tag="12")]
+    pub token: ::prost::alloc::string::String,
+    /// data payload
+    #[prost(string, tag="13")]
     pub to: ::prost::alloc::string::String,
-    #[prost(string, tag="7")]
+    #[prost(string, tag="14")]
     pub quantity: ::prost::alloc::string::String,
-    #[prost(string, tag="8")]
+    #[prost(string, tag="15")]
     pub memo: ::prost::alloc::string::String,
     /// extras
-    #[prost(uint32, tag="9")]
+    #[prost(uint32, tag="16")]
     pub precision: u32,
-    #[prost(int64, tag="10")]
+    #[prost(int64, tag="17")]
     pub amount: i64,
-    #[prost(double, tag="11")]
+    #[prost(double, tag="18")]
     pub value: f64,
-    /// block information
-    #[prost(uint64, tag="12")]
-    pub block_num: u64,
-    #[prost(message, optional, tag="13")]
-    pub timestamp: ::core::option::Option<::prost_types::Timestamp>,
-    #[prost(string, tag="14")]
-    pub block_hash: ::prost::alloc::string::String,
-    #[prost(string, tag="15")]
-    pub block_date: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Retire {
-    /// trace information
-    #[prost(string, tag="1")]
-    pub trx_id: ::prost::alloc::string::String,
-    #[prost(uint32, tag="2")]
-    pub action_index: u32,
-    /// contract & scope
+    /// block information
+    #[prost(uint64, tag="1")]
+    pub block_num: u64,
+    #[prost(message, optional, tag="2")]
+    pub timestamp: ::core::option::Option<::prost_types::Timestamp>,
     #[prost(string, tag="3")]
-    pub contract: ::prost::alloc::string::String,
+    pub block_hash: ::prost::alloc::string::String,
+    #[prost(string, tag="4")]
+    pub block_date: ::prost::alloc::string::String,
+    /// trace information
     #[prost(string, tag="5")]
+    pub trx_id: ::prost::alloc::string::String,
+    #[prost(uint32, tag="6")]
+    pub action_ordinal: u32,
+    /// Action execution_index
+    #[prost(uint32, tag="7")]
+    pub index: u32,
+    /// Vec<PermissionLevel> (ex: \["account@active"\])
+    #[prost(string, repeated, tag="8")]
+    pub authorization: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    /// contract & scope
+    ///
+    /// Name (ex: "eosio.token")
+    #[prost(string, tag="10")]
+    pub contract: ::prost::alloc::string::String,
+    /// SymbolCode (ex: "EOS")
+    #[prost(string, tag="11")]
     pub symcode: ::prost::alloc::string::String,
+    /// ExtendedSymbol (ex: "4,EOS@eosio.token")
+    #[prost(string, tag="12")]
+    pub token: ::prost::alloc::string::String,
     /// data payload
-    #[prost(string, tag="6")]
-    pub from: ::prost::alloc::string::String,
-    #[prost(string, tag="7")]
+    #[prost(string, tag="16")]
     pub quantity: ::prost::alloc::string::String,
-    #[prost(string, tag="8")]
+    #[prost(string, tag="17")]
     pub memo: ::prost::alloc::string::String,
     /// extras
-    #[prost(uint32, tag="9")]
+    #[prost(uint32, tag="18")]
     pub precision: u32,
-    #[prost(int64, tag="10")]
+    #[prost(int64, tag="19")]
     pub amount: i64,
-    #[prost(double, tag="11")]
+    #[prost(double, tag="20")]
     pub value: f64,
-    /// block information
-    #[prost(uint64, tag="12")]
-    pub block_num: u64,
-    #[prost(message, optional, tag="13")]
-    pub timestamp: ::core::option::Option<::prost_types::Timestamp>,
-    #[prost(string, tag="14")]
-    pub block_hash: ::prost::alloc::string::String,
-    #[prost(string, tag="15")]
-    pub block_date: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Create {
-    /// trace information
-    #[prost(string, tag="1")]
-    pub trx_id: ::prost::alloc::string::String,
-    #[prost(uint32, tag="2")]
-    pub action_index: u32,
-    /// contract & scope
+    /// block information
+    #[prost(uint64, tag="1")]
+    pub block_num: u64,
+    #[prost(message, optional, tag="2")]
+    pub timestamp: ::core::option::Option<::prost_types::Timestamp>,
     #[prost(string, tag="3")]
-    pub contract: ::prost::alloc::string::String,
+    pub block_hash: ::prost::alloc::string::String,
+    #[prost(string, tag="4")]
+    pub block_date: ::prost::alloc::string::String,
+    /// trace information
     #[prost(string, tag="5")]
+    pub trx_id: ::prost::alloc::string::String,
+    #[prost(uint32, tag="6")]
+    pub action_ordinal: u32,
+    /// Action execution_index
+    #[prost(uint32, tag="7")]
+    pub index: u32,
+    /// Vec<PermissionLevel> (ex: \["account@active"\])
+    #[prost(string, repeated, tag="8")]
+    pub authorization: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    /// contract & scope
+    ///
+    /// Name (ex: "eosio.token")
+    #[prost(string, tag="10")]
+    pub contract: ::prost::alloc::string::String,
+    /// SymbolCode (ex: "EOS")
+    #[prost(string, tag="11")]
     pub symcode: ::prost::alloc::string::String,
+    /// ExtendedSymbol (ex: "4,EOS@eosio.token")
+    #[prost(string, tag="12")]
+    pub token: ::prost::alloc::string::String,
     /// data payload
-    #[prost(string, tag="6")]
+    #[prost(string, tag="13")]
     pub issuer: ::prost::alloc::string::String,
-    #[prost(string, tag="7")]
+    #[prost(string, tag="14")]
     pub maximum_supply: ::prost::alloc::string::String,
     /// extras
-    #[prost(uint32, tag="8")]
+    #[prost(uint32, tag="15")]
     pub precision: u32,
-    #[prost(int64, tag="9")]
+    #[prost(int64, tag="16")]
     pub amount: i64,
-    #[prost(double, tag="10")]
+    #[prost(double, tag="17")]
     pub value: f64,
-    /// block information
-    #[prost(uint64, tag="11")]
-    pub block_num: u64,
-    #[prost(message, optional, tag="12")]
-    pub timestamp: ::core::option::Option<::prost_types::Timestamp>,
-    #[prost(string, tag="13")]
-    pub block_hash: ::prost::alloc::string::String,
-    #[prost(string, tag="14")]
-    pub block_date: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct BalanceChange {
-    /// trace information
-    #[prost(string, tag="1")]
-    pub trx_id: ::prost::alloc::string::String,
-    #[prost(uint32, tag="2")]
-    pub action_index: u32,
-    /// contract & scope
+    /// block information
+    #[prost(uint64, tag="1")]
+    pub block_num: u64,
+    #[prost(message, optional, tag="2")]
+    pub timestamp: ::core::option::Option<::prost_types::Timestamp>,
     #[prost(string, tag="3")]
-    pub contract: ::prost::alloc::string::String,
+    pub block_hash: ::prost::alloc::string::String,
     #[prost(string, tag="4")]
-    pub symcode: ::prost::alloc::string::String,
-    /// data payload
+    pub block_date: ::prost::alloc::string::String,
+    /// trace information
     #[prost(string, tag="5")]
+    pub trx_id: ::prost::alloc::string::String,
+    /// Action execution_index
+    #[prost(uint32, tag="6")]
+    pub action_index: u32,
+    /// DbOps index
+    #[prost(uint32, tag="7")]
+    pub index: u32,
+    /// contract & scope
+    ///
+    /// Name (ex: "eosio.token")
+    #[prost(string, tag="10")]
+    pub contract: ::prost::alloc::string::String,
+    /// SymbolCode (ex: "EOS")
+    #[prost(string, tag="11")]
+    pub symcode: ::prost::alloc::string::String,
+    /// ExtendedSymbol (ex: "4,EOS@eosio.token")
+    #[prost(string, tag="12")]
+    pub token: ::prost::alloc::string::String,
+    /// DbOps
+    ///
+    /// db_op::Operation
+    #[prost(string, tag="13")]
+    pub operation: ::prost::alloc::string::String,
+    /// data payload
+    #[prost(string, tag="14")]
     pub account: ::prost::alloc::string::String,
-    #[prost(string, tag="6")]
+    #[prost(string, tag="15")]
     pub balance: ::prost::alloc::string::String,
-    #[prost(int64, tag="7")]
+    #[prost(int64, tag="16")]
     pub balance_delta: i64,
     /// extras
-    #[prost(uint32, tag="10")]
+    #[prost(uint32, tag="17")]
     pub precision: u32,
-    #[prost(int64, tag="11")]
+    #[prost(int64, tag="18")]
     pub amount: i64,
-    #[prost(double, tag="12")]
+    #[prost(double, tag="19")]
     pub value: f64,
-    /// block information
-    #[prost(uint64, tag="13")]
-    pub block_num: u64,
-    #[prost(message, optional, tag="14")]
-    pub timestamp: ::core::option::Option<::prost_types::Timestamp>,
-    #[prost(string, tag="15")]
-    pub block_hash: ::prost::alloc::string::String,
-    #[prost(string, tag="16")]
-    pub block_date: ::prost::alloc::string::String,
-    /// token
-    ///
-    /// ExtendedSymbol
-    #[prost(string, tag="17")]
-    pub token: ::prost::alloc::string::String,
-    /// db_op::Operation
-    #[prost(string, tag="18")]
-    pub operation: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct SupplyChange {
-    /// trace information
-    #[prost(string, tag="1")]
-    pub trx_id: ::prost::alloc::string::String,
-    #[prost(uint32, tag="2")]
-    pub action_index: u32,
-    /// contract & scope
-    #[prost(string, tag="3")]
-    pub contract: ::prost::alloc::string::String,
-    #[prost(string, tag="4")]
-    pub symcode: ::prost::alloc::string::String,
-    /// data payload
-    #[prost(string, tag="5")]
-    pub issuer: ::prost::alloc::string::String,
-    #[prost(string, tag="6")]
-    pub max_supply: ::prost::alloc::string::String,
-    #[prost(string, tag="7")]
-    pub supply: ::prost::alloc::string::String,
-    #[prost(int64, tag="8")]
-    pub supply_delta: i64,
-    /// extras
-    #[prost(uint32, tag="10")]
-    pub precision: u32,
-    #[prost(int64, tag="11")]
-    pub amount: i64,
-    #[prost(double, tag="12")]
-    pub value: f64,
     /// block information
-    #[prost(uint64, tag="13")]
+    #[prost(uint64, tag="1")]
     pub block_num: u64,
-    #[prost(message, optional, tag="14")]
+    #[prost(message, optional, tag="2")]
     pub timestamp: ::core::option::Option<::prost_types::Timestamp>,
-    #[prost(string, tag="15")]
+    #[prost(string, tag="3")]
     pub block_hash: ::prost::alloc::string::String,
-    #[prost(string, tag="16")]
+    #[prost(string, tag="4")]
     pub block_date: ::prost::alloc::string::String,
-    /// token
+    /// trace information
+    #[prost(string, tag="5")]
+    pub trx_id: ::prost::alloc::string::String,
+    /// Action execution_index
+    #[prost(uint32, tag="6")]
+    pub action_index: u32,
+    /// DbOps index
+    #[prost(uint32, tag="7")]
+    pub index: u32,
+    /// contract & scope
     ///
-    /// ExtendedSymbol
-    #[prost(string, tag="17")]
+    /// Name (ex: "eosio.token")
+    #[prost(string, tag="10")]
+    pub contract: ::prost::alloc::string::String,
+    /// SymbolCode (ex: "EOS")
+    #[prost(string, tag="11")]
+    pub symcode: ::prost::alloc::string::String,
+    /// ExtendedSymbol (ex: "4,EOS@eosio.token")
+    #[prost(string, tag="12")]
     pub token: ::prost::alloc::string::String,
+    /// DbOps
+    ///
     /// db_op::Operation
-    #[prost(string, tag="18")]
+    #[prost(string, tag="13")]
     pub operation: ::prost::alloc::string::String,
+    /// data payload
+    #[prost(string, tag="14")]
+    pub issuer: ::prost::alloc::string::String,
+    #[prost(string, tag="15")]
+    pub supply: ::prost::alloc::string::String,
+    #[prost(int64, tag="16")]
+    pub supply_delta: i64,
+    #[prost(string, tag="17")]
+    pub max_supply: ::prost::alloc::string::String,
+    #[prost(int64, tag="18")]
+    pub max_supply_delta: i64,
+    /// extras
+    #[prost(uint32, tag="19")]
+    pub precision: u32,
+    #[prost(int64, tag="20")]
+    pub amount: i64,
+    #[prost(double, tag="21")]
+    pub value: f64,
 }
 // @@protoc_insertion_point(module)

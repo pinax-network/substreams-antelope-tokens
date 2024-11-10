@@ -1,4 +1,4 @@
-use crate::BalanceChange;
+use crate::{utils::to_date, BalanceChange};
 use antelope::{Asset, ExtendedSymbol, Name};
 use substreams::{log, pb::substreams::Clock};
 use substreams_antelope::Block;
@@ -6,6 +6,7 @@ use substreams_antelope::Block;
 use crate::utils::{self, parse_json_asset};
 
 pub fn collect_balance_changes(clock: &Clock, block: &Block) -> Vec<BalanceChange> {
+    let mut index = 0; // incremental index for each balance change
     block
         .transaction_traces()
         .flat_map(|trx| {
@@ -62,17 +63,27 @@ pub fn collect_balance_changes(clock: &Clock, block: &Block) -> Vec<BalanceChang
                 let balance = new_balance.as_ref().unwrap_or(&zero);
                 let old_balance = old_balance.as_ref().unwrap_or(&zero);
                 let balance_delta = balance.amount - old_balance.amount;
+                index += 1;
 
                 Some(BalanceChange {
-                    // trace information
+                    // block
+                    block_num: clock.number,
+                    timestamp: clock.timestamp,
+                    block_hash: clock.id.clone(),
+                    block_date: to_date(&clock),
+
+                    // transaction
                     trx_id: trx.id.clone(),
                     action_index: db_op.action_index,
+                    operation: db_op.operation().as_str_name().to_string(),
+                    index,
 
-                    // contract & scope
+                    // code & scope
                     contract: contract.to_string(),
-                    symcode: sym.code().to_string(),
+                    symcode: balance.symbol.code().to_string(),
+                    token: token.to_string(),
 
-                    // payload
+                    // data
                     account: account.to_string(),
                     balance: balance.to_string(),
                     balance_delta,
@@ -81,16 +92,6 @@ pub fn collect_balance_changes(clock: &Clock, block: &Block) -> Vec<BalanceChang
                     precision: sym.precision().into(),
                     amount: balance.amount,
                     value: utils::to_value(&balance),
-
-                    // block
-                    block_num: clock.number,
-                    timestamp: clock.timestamp,
-                    block_hash: clock.id.clone(),
-                    block_date: utils::to_date(&clock),
-
-                    // token (ex: "4,EOS@eosio.token")
-                    token: token.to_string(),
-                    operation: db_op.operation().as_str_name().to_string(),
                 })
             })
         })

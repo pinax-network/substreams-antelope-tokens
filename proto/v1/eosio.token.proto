@@ -14,167 +14,180 @@ message Events {
 }
 
 message Transfer {
+  // block information
+  uint64 block_num = 1;
+  google.protobuf.Timestamp timestamp = 2;
+  string block_hash = 3;
+  string block_date = 4;
+
   // trace information
-  string trx_id = 1;
-  uint32 action_index = 2;
+  string trx_id = 5;
+  uint32 action_ordinal = 6;
+  uint32 index = 7; // Action execution_index
+  repeated string authorization = 8; // Vec<PermissionLevel> (ex: ["account@active"])
 
   // contract & scope
-  string contract = 3;
-  string symcode = 5;
+  string contract = 10; // Name (ex: "eosio.token")
+  string symcode = 11; // SymbolCode (ex: "EOS")
+  string token = 12; // ExtendedSymbol (ex: "4,EOS@eosio.token")
 
   // data payload
-  string from = 6;
-  string to = 7;
-  string quantity = 8;
-  string memo = 9;
+  string from = 13;
+  string to = 14;
+  string quantity = 15;
+  string memo = 16;
 
   // extras
-  uint32 precision = 10;
-  int64 amount = 11;
-  double value = 12;
-
-  // block information
-  uint64 block_num = 13;
-  google.protobuf.Timestamp timestamp = 14;
-  string block_hash = 15;
-  string block_date = 16;
+  uint32 precision = 17;
+  int64 amount = 18;
+  double value = 19;
 }
 
 message Issue {
+  // block information
+  uint64 block_num = 1;
+  google.protobuf.Timestamp timestamp = 2;
+  string block_hash = 3;
+  string block_date = 4;
+
   // trace information
-  string trx_id = 1;
-  uint32 action_index = 2;
+  string trx_id = 5;
+  uint32 action_ordinal = 6;
+  uint32 index = 7; // Action execution_index
+  repeated string authorization = 8; // Vec<PermissionLevel> (ex: ["account@active"])
 
   // contract & scope
-  string contract = 3;
-  string symcode = 4;
+  string contract = 10; // Name (ex: "eosio.token")
+  string symcode = 11; // SymbolCode (ex: "EOS")
+  string token = 12; // ExtendedSymbol (ex: "4,EOS@eosio.token")
 
   // data payload
-  string issuer = 5;
-  string to = 6;
-  string quantity = 7;
-  string memo = 8;
+  string to = 13;
+  string quantity = 14;
+  string memo = 15;
 
   // extras
-  uint32 precision = 9;
-  int64 amount = 10;
-  double value = 11;
-
-  // block information
-  uint64 block_num = 12;
-  google.protobuf.Timestamp timestamp = 13;
-  string block_hash = 14;
-  string block_date = 15;
+  uint32 precision = 16;
+  int64 amount = 17;
+  double value = 18;
 }
 
 message Retire {
+  // block information
+  uint64 block_num = 1;
+  google.protobuf.Timestamp timestamp = 2;
+  string block_hash = 3;
+  string block_date = 4;
+
   // trace information
-  string trx_id = 1;
-  uint32 action_index = 2;
+  string trx_id = 5;
+  uint32 action_ordinal = 6;
+  uint32 index = 7; // Action execution_index
+  repeated string authorization = 8; // Vec<PermissionLevel> (ex: ["account@active"])
 
   // contract & scope
-  string contract = 3;
-  string symcode = 5;
+  string contract = 10; // Name (ex: "eosio.token")
+  string symcode = 11; // SymbolCode (ex: "EOS")
+  string token = 12; // ExtendedSymbol (ex: "4,EOS@eosio.token")
 
   // data payload
-  string from = 6;
-  string quantity = 7;
-  string memo = 8;
+  string quantity = 16;
+  string memo = 17;
 
   // extras
-  uint32 precision = 9;
-  int64 amount = 10;
-  double value = 11;
-
-  // block information
-  uint64 block_num = 12;
-  google.protobuf.Timestamp timestamp = 13;
-  string block_hash = 14;
-  string block_date = 15;
+  uint32 precision = 18;
+  int64 amount = 19;
+  double value = 20;
 }
 
 message Create {
+  // block information
+  uint64 block_num = 1;
+  google.protobuf.Timestamp timestamp = 2;
+  string block_hash = 3;
+  string block_date = 4;
+
   // trace information
-  string trx_id = 1;
-  uint32 action_index = 2;
+  string trx_id = 5;
+  uint32 action_ordinal = 6;
+  uint32 index = 7; // Action execution_index
+  repeated string authorization = 8; // Vec<PermissionLevel> (ex: ["account@active"])
 
   // contract & scope
-  string contract = 3;
-  string symcode = 5;
+  string contract = 10; // Name (ex: "eosio.token")
+  string symcode = 11; // SymbolCode (ex: "EOS")
+  string token = 12; // ExtendedSymbol (ex: "4,EOS@eosio.token")
 
   // data payload
-  string issuer = 6;
-  string maximum_supply = 7;
+  string issuer = 13;
+  string maximum_supply = 14;
 
   // extras
-  uint32 precision = 8;
-  int64 amount = 9;
-  double value = 10;
-
-  // block information
-  uint64 block_num = 11;
-  google.protobuf.Timestamp timestamp = 12;
-  string block_hash = 13;
-  string block_date = 14;
+  uint32 precision = 15;
+  int64 amount = 16;
+  double value = 17;
 }
 
 message BalanceChange {
+  // block information
+  uint64 block_num = 1;
+  google.protobuf.Timestamp timestamp = 2;
+  string block_hash = 3;
+  string block_date = 4;
+
   // trace information
-  string trx_id = 1;
-  uint32 action_index = 2;
+  string trx_id = 5;
+  uint32 action_index = 6; // Action execution_index
+  uint32 index = 7; // DbOps index
 
   // contract & scope
-  string contract = 3;
-  string symcode = 4;
+  string contract = 10; // Name (ex: "eosio.token")
+  string symcode = 11; // SymbolCode (ex: "EOS")
+  string token = 12; // ExtendedSymbol (ex: "4,EOS@eosio.token")
+
+  // DbOps
+  string operation = 13; // db_op::Operation
 
   // data payload
-  string account = 5;
-  string balance = 6;
-  int64 balance_delta = 7;
+  string account = 14;
+  string balance = 15;
+  int64 balance_delta = 16;
 
   // extras
-  uint32 precision = 10;
-  int64 amount = 11;
-  double value = 12;
-
-  // block information
-  uint64 block_num = 13;
-  google.protobuf.Timestamp timestamp = 14;
-  string block_hash = 15;
-  string block_date = 16;
-
-  // token
-  string token = 17; // ExtendedSymbol
-  string operation = 18; // db_op::Operation
+  uint32 precision = 17;
+  int64 amount = 18;
+  double value = 19;
 }
 
 message SupplyChange {
+  // block information
+  uint64 block_num = 1;
+  google.protobuf.Timestamp timestamp = 2;
+  string block_hash = 3;
+  string block_date = 4;
+
   // trace information
-  string trx_id = 1;
-  uint32 action_index = 2;
+  string trx_id = 5;
+  uint32 action_index = 6; // Action execution_index
+  uint32 index = 7; // DbOps index
 
   // contract & scope
-  string contract = 3;
-  string symcode = 4;
+  string contract = 10; // Name (ex: "eosio.token")
+  string symcode = 11; // SymbolCode (ex: "EOS")
+  string token = 12; // ExtendedSymbol (ex: "4,EOS@eosio.token")
+
+  // DbOps
+  string operation = 13; // db_op::Operation
 
   // data payload
-  string issuer = 5;
-  string max_supply = 6;
-  string supply = 7;
-  int64 supply_delta = 8;
+  string issuer = 14;
+  string supply = 15;
+  int64 supply_delta = 16;
+  string max_supply = 17;
+  int64 max_supply_delta = 18;
 
   // extras
-  uint32 precision = 10;
-  int64 amount = 11;
-  double value = 12;
-
-  // block information
-  uint64 block_num = 13;
-  google.protobuf.Timestamp timestamp = 14;
-  string block_hash = 15;
-  string block_date = 16;
-
-  // token
-  string token = 17; // ExtendedSymbol
-  string operation = 18; // db_op::Operation
+  uint32 precision = 19;
+  int64 amount = 20;
+  double value = 21;
 }

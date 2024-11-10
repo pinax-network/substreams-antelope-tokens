@@ -1,5 +1,6 @@
 use antelope::{Asset, Name};
 use substreams::pb::substreams::Clock;
+use substreams_antelope::pb::PermissionLevel;
 
 pub fn to_value(quantity: &Asset) -> f64 {
     quantity
@@ -20,6 +21,13 @@ pub fn to_date(clock: &Clock) -> String {
         .next()
         .expect("missing date")
         .to_string()
+}
+
+pub fn authorization_to_string(authorization: &Vec<PermissionLevel>) -> Vec<String> {
+    authorization
+        .iter()
+        .map(|a| format!("{}@{}", a.actor, a.permission))
+        .collect()
 }
 
 pub fn parse_json_asset(data_json: &str, key: &str) -> Option<Asset> {

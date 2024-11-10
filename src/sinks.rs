@@ -15,7 +15,7 @@ macro_rules! set_common_fields {
         $row.set("trx_id", $item.trx_id.to_string())
             .set("timestamp", timestamp)
             .set("block_num", $item.block_num.to_string())
-            .set("action_index", $item.action_index.to_string())
+            .set("index", $item.index.to_string())
             .set("contract", $item.contract.to_string())
             .set("symcode", $item.symcode.to_string())
             .set("block_num", $item.block_num.to_string())
@@ -27,12 +27,7 @@ macro_rules! set_common_fields {
 
 macro_rules! unique_key {
     ($item:expr) => {
-        format!(
-            "{}-{}-{}",
-            stringify!($item),
-            $item.trx_id,
-            $item.action_index
-        )
+        format!("{}-{}-{}", stringify!($item), $item.trx_id, $item.index)
     };
 }
 
@@ -40,13 +35,13 @@ macro_rules! unique_key {
 pub fn graph_out(map_events: Events) -> Result<EntityChanges, Error> {
     let mut tables = substreams_entity_change::tables::Tables::new();
 
-    for account in map_events.balance_changes {
+    for event in map_events.balance_changes {
         let row = tables
-            .create_row("Account", unique_key!(account))
-            .set("account", account.account.to_string())
-            .set("balance", account.balance.to_string())
-            .set("balance_delta", account.balance_delta.to_string());
-        set_common_fields!(row, account);
+            .create_row("Account", unique_key!(event))
+            .set("account", event.account.to_string())
+            .set("balance", event.balance.to_string())
+            .set("balance_delta", event.balance_delta.to_string());
+        set_common_fields!(row, event);
     }
 
     for stat in map_events.supply_changes {
@@ -72,7 +67,6 @@ pub fn graph_out(map_events: Events) -> Result<EntityChanges, Error> {
     for issue in map_events.issues {
         let row = tables
             .create_row("Issue", unique_key!(issue))
-            .set("issuer", issue.issuer.to_string())
             .set("to", issue.to.to_string())
             .set("memo", issue.memo.to_string())
             .set("quantity", issue.quantity.to_string());
@@ -83,7 +77,6 @@ pub fn graph_out(map_events: Events) -> Result<EntityChanges, Error> {
         let row = tables
             .create_row("Retire", unique_key!(retire))
             .set("quantity", retire.quantity.to_string())
-            .set("from", retire.from.to_string())
             .set("memo", retire.memo.to_string());
         set_common_fields!(row, retire);
     }
@@ -108,7 +101,7 @@ pub fn ch_out(map_events: Events) -> Result<DatabaseChanges, Error> {
             ("account".to_string(), account.account.to_string()),
             ("block_num".to_string(), account.block_num.to_string()),
             ("trx_id".to_string(), account.trx_id),
-            ("action_index".to_string(), account.action_index.to_string()),
+            ("index".to_string(), account.index.to_string()),
         ]);
 
         tables
@@ -139,7 +132,7 @@ pub fn ch_out(map_events: Events) -> Result<DatabaseChanges, Error> {
             ("contract".to_string(), stat.contract.to_string()),
             ("block_num".to_string(), stat.block_num.to_string()),
             ("trx_id".to_string(), stat.trx_id),
-            ("action_index".to_string(), stat.action_index.to_string()),
+            ("index".to_string(), stat.index.to_string()),
         ]);
 
         tables
@@ -166,10 +159,7 @@ pub fn ch_out(map_events: Events) -> Result<DatabaseChanges, Error> {
     for transfer in map_events.transfers {
         let keys = HashMap::from([
             ("trx_id".to_string(), transfer.trx_id),
-            (
-                "action_index".to_string(),
-                transfer.action_index.to_string(),
-            ),
+            ("index".to_string(), transfer.index.to_string()),
         ]);
 
         tables
@@ -197,12 +187,14 @@ pub fn ch_out(map_events: Events) -> Result<DatabaseChanges, Error> {
             ("to".to_string(), issue.to),
             ("amount".to_string(), issue.amount.to_string()),
             ("trx_id".to_string(), issue.trx_id),
-            ("action_index".to_string(), issue.action_index.to_string()),
+            (
+                "action_ordinal".to_string(),
+                issue.action_ordinal.to_string(),
+            ),
         ]);
 
         tables
             .push_change_composite("issue_events", keys, 0, table_change::Operation::Create)
-            .change("issuer", ("", issue.issuer.to_string().as_str()))
             .change("quantity", ("", issue.quantity.to_string().as_str()))
             .change("memo", ("", issue.memo.to_string().as_str()))
             .change("precision", ("", issue.precision.to_string().as_str()))
@@ -220,12 +212,11 @@ pub fn ch_out(map_events: Events) -> Result<DatabaseChanges, Error> {
             ("symcode".to_string(), retire.symcode),
             ("amount".to_string(), retire.amount.to_string()),
             ("trx_id".to_string(), retire.trx_id),
-            ("action_index".to_string(), retire.action_index.to_string()),
+            ("index".to_string(), retire.index.to_string()),
         ]);
 
         tables
             .push_change_composite("retire_events", keys, 0, table_change::Operation::Create)
-            .change("from", ("", retire.from.to_string().as_str()))
             .change("quantity", ("", retire.quantity.to_string().as_str()))
             .change("memo", ("", retire.memo.to_string().as_str()))
             .change("precision", ("", retire.precision.to_string().as_str()))
@@ -242,7 +233,7 @@ pub fn ch_out(map_events: Events) -> Result<DatabaseChanges, Error> {
             ("contract".to_string(), create.contract),
             ("symcode".to_string(), create.symcode),
             ("trx_id".to_string(), create.trx_id),
-            ("action_index".to_string(), create.action_index.to_string()),
+            ("index".to_string(), create.index.to_string()),
         ]);
 
         tables
