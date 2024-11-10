@@ -10,7 +10,7 @@ pub fn collect_balance_changes(clock: &Clock, block: &Block) -> Vec<BalanceChang
     block
         .transaction_traces()
         .flat_map(|trx| {
-            trx.db_ops.iter().filter_map(|db_op| {
+            trx.db_ops.iter().filter_map(move |db_op| {
                 if db_op.table_name != "accounts" {
                     return None;
                 }

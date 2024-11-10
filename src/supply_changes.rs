@@ -13,7 +13,7 @@ pub fn collect_supply_changes(clock: &Clock, block: &Block) -> Vec<SupplyChange>
     block
         .transaction_traces()
         .flat_map(|trx| {
-            trx.db_ops.iter().filter_map(|db_op| {
+            trx.db_ops.iter().filter_map(move |db_op| {
                 if db_op.table_name != "stat" {
                     return None;
                 }
