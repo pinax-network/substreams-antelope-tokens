@@ -4,15 +4,10 @@ package:
   version: v1.0.1
   url: https://github.com/pinax-network/substreams-antelope-tokens
 
-imports:
-  entities: https://github.com/streamingfast/substreams-sink-entity-changes/releases/download/v1.3.1/substreams-sink-entity-changes-v1.3.1.spkg
-  database_change: https://github.com/streamingfast/substreams-database-change/releases/download/v1.3.1/substreams-database-change-v1.3.1.spkg
-  sql: https://github.com/streamingfast/substreams-sink-sql/releases/download/protodefs-v1.0.3/substreams-sink-sql-protodefs-v1.0.3.spkg
-
 binaries:
   default:
     type: wasm/rust-v1
-    file: ./target/wasm32-unknown-unknown/release/antelope_tokens.wasm
+    file: ./target/wasm32-unknown-unknown/release/substreams_antelope_tokens.wasm
 
 protobuf:
   files:
