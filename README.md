@@ -38,5 +38,5 @@ Kind: map
 Input: source: sf.substreams.v1.Clock
 Input: source: sf.antelope.type.v1.Block
 Output Type: proto:antelope.eosio.token.v1.Events
-Hash: 48034848cd64dcd70f95e06de9ed5d1478d0133e
+Hash: 84951f7ebf3e55a9e1c3a75f095f6a8ba95175b1
 ```
