@@ -1,4 +1,5 @@
 use antelope::{Asset, Name};
+use std::iter::Iterator;
 use substreams::pb::substreams::Clock;
 use substreams_antelope::pb::PermissionLevel;
 
@@ -23,11 +24,12 @@ pub fn to_date(clock: &Clock) -> String {
         .to_string()
 }
 
-pub fn authorization_to_string(authorization: &Vec<PermissionLevel>) -> Vec<String> {
+pub fn authorization_to_string(authorization: &Vec<PermissionLevel>) -> String {
     authorization
         .iter()
         .map(|a| format!("{}@{}", a.actor, a.permission))
-        .collect()
+        .collect::<Vec<String>>()
+        .join(",")
 }
 
 pub fn parse_json_asset(data_json: &str, key: &str) -> Option<Asset> {

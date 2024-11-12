@@ -1,6 +1,6 @@
 [package]
 name = "substreams-antelope-tokens"
-version = "1.0.0"
+version = "1.0.1"
 authors = [
     "Denis <denis@pinax.network>",
     "Yaro <yaro@pinax.network>",

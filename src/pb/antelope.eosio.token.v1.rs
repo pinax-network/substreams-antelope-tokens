@@ -37,8 +37,8 @@ pub struct Transfer {
     #[prost(uint32, tag="7")]
     pub action_ordinal: u32,
     /// Vec<PermissionLevel> (ex: \["account@active"\])
-    #[prost(string, repeated, tag="8")]
-    pub authorization: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    #[prost(string, tag="8")]
+    pub authorization: ::prost::alloc::string::String,
     /// contract & scope
     ///
     /// Name (ex: "eosio.token")
@@ -88,8 +88,8 @@ pub struct Issue {
     #[prost(uint32, tag="7")]
     pub action_ordinal: u32,
     /// Vec<PermissionLevel> (ex: \["account@active"\])
-    #[prost(string, repeated, tag="8")]
-    pub authorization: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    #[prost(string, tag="8")]
+    pub authorization: ::prost::alloc::string::String,
     /// contract & scope
     ///
     /// Name (ex: "eosio.token")
@@ -137,8 +137,8 @@ pub struct Retire {
     #[prost(uint32, tag="7")]
     pub action_ordinal: u32,
     /// Vec<PermissionLevel> (ex: \["account@active"\])
-    #[prost(string, repeated, tag="8")]
-    pub authorization: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    #[prost(string, tag="8")]
+    pub authorization: ::prost::alloc::string::String,
     /// contract & scope
     ///
     /// Name (ex: "eosio.token")
@@ -184,8 +184,8 @@ pub struct Create {
     #[prost(uint32, tag="7")]
     pub action_ordinal: u32,
     /// Vec<PermissionLevel> (ex: \["account@active"\])
-    #[prost(string, repeated, tag="8")]
-    pub authorization: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    #[prost(string, tag="8")]
+    pub authorization: ::prost::alloc::string::String,
     /// contract & scope
     ///
     /// Name (ex: "eosio.token")

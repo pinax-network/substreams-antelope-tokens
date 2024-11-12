@@ -24,7 +24,7 @@ message Transfer {
   string trx_id = 5;
   uint32 index = 6; // Action execution_index
   uint32 action_ordinal = 7;
-  repeated string authorization = 8; // Vec<PermissionLevel> (ex: ["account@active"])
+  string authorization = 8; // Vec<PermissionLevel> (ex: ["account@active"])
 
   // contract & scope
   string contract = 10; // Name (ex: "eosio.token")
@@ -54,7 +54,7 @@ message Issue {
   string trx_id = 5;
   uint32 index = 6; // Action execution_index
   uint32 action_ordinal = 7;
-  repeated string authorization = 8; // Vec<PermissionLevel> (ex: ["account@active"])
+  string authorization = 8; // Vec<PermissionLevel> (ex: ["account@active"])
 
   // contract & scope
   string contract = 10; // Name (ex: "eosio.token")
@@ -83,7 +83,7 @@ message Retire {
   string trx_id = 5;
   uint32 index = 6; // Action execution_index
   uint32 action_ordinal = 7;
-  repeated string authorization = 8; // Vec<PermissionLevel> (ex: ["account@active"])
+  string authorization = 8; // Vec<PermissionLevel> (ex: ["account@active"])
 
   // contract & scope
   string contract = 10; // Name (ex: "eosio.token")
@@ -111,7 +111,7 @@ message Create {
   string trx_id = 5;
   uint32 index = 6; // Action execution_index
   uint32 action_ordinal = 7;
-  repeated string authorization = 8; // Vec<PermissionLevel> (ex: ["account@active"])
+  string authorization = 8; // Vec<PermissionLevel> (ex: ["account@active"])
 
   // contract & scope
   string contract = 10; // Name (ex: "eosio.token")
